@@ -1,4 +1,3 @@
-// pages/api/debug.js
 export default async function handler(req, res) {
     // Verzamel debug-informatie
     const debugInfo = {

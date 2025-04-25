@@ -56,7 +56,7 @@ const Header = () => {
         >
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo/Site Title */}
+                    {/* Logo/Site Titel */}
                     <Link
                         href="/"
                         className="flex items-center space-x-2 group"
@@ -69,7 +69,7 @@ const Header = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
+                    {/* Desktop Navigatie */}
                     <nav className="hidden md:block">
                         <ul className="flex space-x-1">
                             {navigationItems.map((item) => (
@@ -92,7 +92,7 @@ const Header = () => {
                         </ul>
                     </nav>
 
-                    {/* Mobile Menu Button */}
+                    {/* Mobiele Menu Knop */}
                     <button
                         className={`md:hidden p-2 rounded-md transition-colors ${isScrolled
                                 ? 'text-gray-700 hover:bg-gray-100'
@@ -129,7 +129,7 @@ const Header = () => {
                     </button>
                 </div>
 
-                {/* Mobile Navigation - Slide Down Menu */}
+                {/* Mobiele Navigatie - Slide Down Menu */}
                 <div
                     className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
                         }`}

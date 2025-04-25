@@ -1,7 +1,7 @@
 import React from 'react';
 
 const LoadingIndicator = ({ size = 'medium', message = 'Laden...' }) => {
-    // Size configurations
+    // Grootte configuraties
     const sizes = {
         small: {
             spinnerSize: 'h-4 w-4',

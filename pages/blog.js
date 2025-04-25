@@ -1,5 +1,3 @@
-// pages/blog.js
-
 import { useState, useEffect } from 'react';
 import { fetchAPI } from '../lib/api';
 import { GET_ALL_POSTS, GET_CATEGORIES } from '../lib/queries';
@@ -12,7 +10,7 @@ import { useRouter } from 'next/router';
 
 export default function Blog({ initialPosts, categories }) {
     const router = useRouter();
-    const [posts] = useState(initialPosts); // Remove unused setPosts
+    const [posts] = useState(initialPosts);
     const [filteredPosts, setFilteredPosts] = useState(initialPosts);
     const [activeCategory, setActiveCategory] = useState('all');
     const [sortOption, setSortOption] = useState('newest');
@@ -67,7 +65,7 @@ export default function Blog({ initialPosts, categories }) {
     const handleCategoryChange = (category) => {
         setActiveCategory(category);
 
-        // Update URL query parameter
+        // URL-queryparameter bijwerken
         router.push({
             pathname: '/blog',
             query: {
@@ -78,11 +76,11 @@ export default function Blog({ initialPosts, categories }) {
         }, undefined, { shallow: true });
     };
 
-    // Handle sortering
+    // Handle sorteren
     const handleSortChange = (e) => {
         setSortOption(e.target.value);
 
-        // Update URL query parameter
+        // URL-queryparameter bijwerken
         router.push({
             pathname: '/blog',
             query: {
@@ -97,7 +95,7 @@ export default function Blog({ initialPosts, categories }) {
     const handleSearch = (query) => {
         setSearchQuery(query);
 
-        // Update URL query parameter
+        // URL-queryparameter bijwerken
         router.push({
             pathname: '/blog',
             query: {
@@ -143,7 +141,7 @@ export default function Blog({ initialPosts, categories }) {
                     <p className="text-gray-600 mb-8">Bekijk al onze artikelen of filter op categorie en onderwerp.</p>
 
                     <div className="mb-8 bg-white p-6 rounded-lg shadow-md">
-                        {/* Filters section */}
+                        {/* Sectie filters */}
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                             <div className="md:w-1/2">
                                 <SearchBar
@@ -189,7 +187,7 @@ export default function Blog({ initialPosts, categories }) {
                             </div>
                         </div>
 
-                        {/* Results info */}
+                        {/* Resultaten info */}
                         <div className="text-sm text-gray-600 mb-4">
                             {filteredPosts.length} {filteredPosts.length === 1 ? 'artikel' : 'artikelen'} gevonden
                             {activeCategory !== 'all' && categories.find(c => c.slug === activeCategory) &&
@@ -208,7 +206,7 @@ export default function Blog({ initialPosts, categories }) {
                                 ))}
                             </div>
 
-                            {/* Pagination */}
+                            {/* Paginering */}
                             {totalPages > 1 && (
                                 <div className="mt-12 flex justify-center">
                                     <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
@@ -235,8 +233,8 @@ export default function Blog({ initialPosts, categories }) {
                                                         key={pageNumber}
                                                         onClick={() => paginate(pageNumber)}
                                                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNumber
-                                                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                                                             }`}
                                                     >
                                                         {pageNumber}
@@ -307,7 +305,7 @@ export default function Blog({ initialPosts, categories }) {
 
 export async function getStaticProps() {
     try {
-        // Fetch posts en categorieën parallel
+        // Haal berichten en categorieën parallel op
         const [postsData, categoriesData] = await Promise.all([
             fetchAPI(GET_ALL_POSTS),
             fetchAPI(GET_CATEGORIES)

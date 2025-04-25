@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const PostCard = ({ post }) => {
-    // Format the date
+    // Formatteer de datum
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('nl-NL', {
@@ -12,14 +12,14 @@ const PostCard = ({ post }) => {
         });
     };
 
-    // Truncate excerpt text to avoid too long previews
+    // Beperk de lengte van het uittreksel om te lange voorvertoningen te voorkomen
     const truncateExcerpt = (excerpt, maxLength = 120) => {
-        // Remove HTML tags
+        // Verwijder HTML-tags
         const plainText = excerpt.replace(/<[^>]+>/g, '');
 
         if (plainText.length <= maxLength) return plainText;
 
-        // Find the last space before maxLength
+        // Vind de laatste spatie voor maxLength
         const truncated = plainText.substr(0, maxLength);
         const lastSpace = truncated.lastIndexOf(' ');
 

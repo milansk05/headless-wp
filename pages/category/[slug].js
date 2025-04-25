@@ -1,5 +1,3 @@
-// pages/category/[slug].js
-
 import { fetchAPI } from '../../lib/api';
 import { GET_CATEGORIES, GET_POSTS_BY_CATEGORY } from '../../lib/queries';
 import Link from 'next/link';

@@ -6,20 +6,20 @@ const Comments = ({ postId }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch comments for this post
+    // Reacties voor dit bericht ophalen
     useEffect(() => {
         const fetchComments = async () => {
             try {
                 setLoading(true);
                 setError(null);
-
+                
                 const response = await fetch(`/api/comments?postId=${postId}`);
-
+                
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Failed to fetch comments');
                 }
-
+                
                 const data = await response.json();
                 setComments(data.comments || []);
                 setLoading(false);
@@ -38,7 +38,7 @@ const Comments = ({ postId }) => {
         }
     }, [postId]);
 
-    // Format date for display
+    // Datum opmaken voor weergave
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('nl-NL', {
@@ -91,9 +91,9 @@ const Comments = ({ postId }) => {
                                         <h4 className="font-medium text-gray-900">{comment.authorName}</h4>
                                         <span className="text-sm text-gray-500">{formatDate(comment.date)}</span>
                                     </div>
-                                    <div className="prose prose-sm max-w-none text-gray-700"
+                                    <div className="prose prose-sm max-w-none text-gray-700" 
                                         dangerouslySetInnerHTML={{ __html: comment.content }} />
-
+                                    
                                     {comment.replies && comment.replies.length > 0 && (
                                         <div className="mt-6 pl-4 border-l-2 border-blue-100 space-y-4">
                                             <h4 className="text-sm font-medium text-gray-500 mb-3">
@@ -112,7 +112,7 @@ const Comments = ({ postId }) => {
                                                                 <h5 className="font-medium text-gray-900">{reply.authorName}</h5>
                                                                 <span className="text-xs text-gray-500">{formatDate(reply.date)}</span>
                                                             </div>
-                                                            <div className="prose prose-sm max-w-none text-gray-700"
+                                                            <div className="prose prose-sm max-w-none text-gray-700" 
                                                                 dangerouslySetInnerHTML={{ __html: reply.content }} />
                                                         </div>
                                                     </div>

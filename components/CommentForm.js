@@ -25,7 +25,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
         setStatus(prevStatus => ({ ...prevStatus, submitting: true }));
 
         try {
-            // API endpoint for submitting comment
+            // API-eindpunt voor het plaatsen van een reactie
             const res = await fetch('/api/comments', {
                 method: 'POST',
                 headers: {
@@ -51,7 +51,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                     comment: ''
                 });
 
-                // Notify parent component that a comment was submitted
+                // Oudercomponent informeren dat een reactie is geplaatst
                 if (onCommentSubmitted) {
                     onCommentSubmitted();
                 }
@@ -87,7 +87,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                         type="button"
                         onClick={() => {
                             setStatus({ submitted: false, submitting: false, info: { error: false, msg: null } });
-                            // Trigger the onCommentSubmitted callback to reload comments
+                            // Roep de onCommentSubmitted callback aan om reacties opnieuw te laden
                             if (onCommentSubmitted) {
                                 onCommentSubmitted();
                             }

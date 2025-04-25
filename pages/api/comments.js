@@ -1,6 +1,6 @@
 import { fetchAPI } from '../../lib/api';
 
-// GraphQL mutation for adding a comment
+// GraphQL mutatie voor het toevoegen van een reactie
 const ADD_COMMENT = `
   mutation AddComment($postId: Int!, $content: String!, $author: String!, $authorEmail: String!) {
     createComment(
@@ -27,7 +27,7 @@ const ADD_COMMENT = `
   }
 `;
 
-// GraphQL query for getting comments
+// GraphQL query voor het ophalen van reacties
 const GET_COMMENTS = `
   query GetComments($postId: ID!) {
     comments(where: { contentId: $postId }) {
@@ -47,7 +47,7 @@ const GET_COMMENTS = `
   }
 `;
 
-// Validate comment data
+// Valideer reactiegegevens
 const validateCommentData = (data) => {
     const errors = [];
 
@@ -70,20 +70,20 @@ const validateCommentData = (data) => {
     return errors;
 };
 
-// Format comments to a more usable structure
+// Formatteer reacties naar een meer bruikbare structuur
 const formatComments = (comments) => {
     if (!comments || !Array.isArray(comments)) {
         console.warn('No valid comments array to format', comments);
         return [];
     }
 
-    // First, separate parent comments and replies
+    // Eerst, scheid de hoofdcommentaren en antwoorden
     const parentComments = comments.filter(comment => !comment.parentId);
     const replies = comments.filter(comment => comment.parentId);
 
-    // Format each parent comment
+    // Formatteer elke hoofdcomment
     const formattedComments = parentComments.map(comment => {
-        // Find replies for this comment
+        // Vind reacties voor deze comment
         const commentReplies = replies.filter(reply => reply.parentId === comment.id);
 
         return {
@@ -106,7 +106,7 @@ const formatComments = (comments) => {
 };
 
 export default async function handler(req, res) {
-    // Handle GET request (fetch comments)
+    // Behandel GET-verzoek (reacties ophalen)
     if (req.method === 'GET') {
         try {
             const { postId } = req.query;
@@ -150,12 +150,12 @@ export default async function handler(req, res) {
         }
     }
 
-    // Handle POST request (add comment)
+    // Behandel POST-verzoek (reactie toevoegen)
     if (req.method === 'POST') {
         try {
             const { name, email, comment, postId } = req.body;
 
-            // Validate form data
+            // Valideer formuliergegevens
             const validationErrors = validateCommentData({
                 name,
                 email,
@@ -169,7 +169,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Convert postId to integer for the GraphQL API
+            // Zet postId om naar een integer voor de GraphQL API
             const postIdInt = parseInt(postId, 10);
 
             if (isNaN(postIdInt)) {
@@ -178,7 +178,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Send comment to WordPress
+            // Stuur reactie naar WordPress
             const data = await fetchAPI(ADD_COMMENT, {
                 variables: {
                     postId: postIdInt,
@@ -226,6 +226,6 @@ export default async function handler(req, res) {
         }
     }
 
-    // Method not allowed
+    // Methode niet toegestaan
     return res.status(405).json({ message: 'Method Not Allowed' });
 }

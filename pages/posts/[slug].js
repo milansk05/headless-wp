@@ -84,7 +84,7 @@ export default function Post({ post, relatedPosts = [] }) {
                     <meta property="og:image" content={post.featuredImage.node.sourceUrl} />
                 )}
 
-                {/* Article specific meta tags */}
+                {/* Artikel specifieke meta tags */}
                 <meta property="article:published_time" content={post.date} />
                 {post.categories?.nodes?.map((category, index) => (
                     <meta key={index} property="article:section" content={category.name} />
@@ -173,7 +173,7 @@ export default function Post({ post, relatedPosts = [] }) {
                     )}
                 </article>
 
-                {/* Comments Section */}
+                {/* Reacties sectie */}
                 <CommentsSection postId={post.databaseId} />
 
                 {relatedPosts.length > 0 && (

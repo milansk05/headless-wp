@@ -1,5 +1,3 @@
-// pages/[slug].js
-
 import { fetchAPI } from '../lib/api';
 import { GET_PAGE_BY_SLUG, GET_ALL_PAGES } from '../lib/queries';
 import Head from 'next/head';
@@ -7,7 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useContext } from 'react';
 import { SiteContext } from './_app';
-import Image from 'next/image'; // Add next/image import
+import Image from 'next/image';
 
 export default function Page({ page }) {
     const { siteSettings } = useContext(SiteContext);
