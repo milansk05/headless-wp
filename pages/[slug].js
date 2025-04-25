@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useContext } from 'react';
 import { SiteContext } from './_app';
+import Image from 'next/image'; // Add next/image import
 
 export default function Page({ page }) {
     const { siteSettings } = useContext(SiteContext);
@@ -40,11 +41,14 @@ export default function Page({ page }) {
                     <h1 className="text-3xl md:text-4xl font-bold mb-6">{page.title}</h1>
 
                     {page.featuredImage?.node && (
-                        <div className="mb-6">
-                            <img
+                        <div className="mb-6 relative w-full h-72">
+                            <Image
                                 src={page.featuredImage.node.sourceUrl}
                                 alt={page.featuredImage.node.altText || page.title}
-                                className="w-full rounded-lg"
+                                className="rounded-lg"
+                                fill
+                                sizes="(max-width: 768px) 100vw, 800px"
+                                style={{ objectFit: 'cover' }}
                             />
                         </div>
                     )}

@@ -145,8 +145,8 @@ export default function Post({ post, relatedPosts = [] }) {
                         <div className="mt-12 pt-8 border-t border-gray-200">
                             <div className="flex items-center">
                                 {post.author.node.avatar?.url ? (
-                                    <div className="mr-4">
-                                        <img
+                                    <div className="mr-4 relative w-[60px] h-[60px]">
+                                        <Image
                                             src={post.author.node.avatar.url}
                                             alt={post.author.node.name || 'Auteur'}
                                             width={60}

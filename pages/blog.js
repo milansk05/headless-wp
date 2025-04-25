@@ -1,7 +1,6 @@
 // pages/blog.js
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { fetchAPI } from '../lib/api';
 import { GET_ALL_POSTS, GET_CATEGORIES } from '../lib/queries';
 import Header from '../components/Header';
@@ -13,12 +12,11 @@ import { useRouter } from 'next/router';
 
 export default function Blog({ initialPosts, categories }) {
     const router = useRouter();
-    const [posts, setPosts] = useState(initialPosts);
+    const [posts] = useState(initialPosts); // Remove unused setPosts
     const [filteredPosts, setFilteredPosts] = useState(initialPosts);
     const [activeCategory, setActiveCategory] = useState('all');
     const [sortOption, setSortOption] = useState('newest');
     const [searchQuery, setSearchQuery] = useState('');
-    const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 9;
 
