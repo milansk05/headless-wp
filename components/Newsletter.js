@@ -54,7 +54,7 @@ const Newsletter = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Je e-mailadres"
-                                className="flex-grow px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-200"
+                                className="flex-grow px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 border hover:border-blue-400"
                                 required
                             />
                             <button

@@ -2,7 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['headless-wp.local'], // Voeg hier je WordPress domein toe
+    domains: [
+      'headless-wp.local',
+      'secure.gravatar.com',
+      'i0.wp.com',
+      'i1.wp.com',
+      'i2.wp.com',
+      'localhost',
+      'placehold.it',
+      'via.placeholder.com'
+    ],
     remotePatterns: [
       {
         protocol: 'http',
@@ -10,7 +19,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      // Voeg extra patronen toe indien nodig, bijvoorbeeld voor staging of productie
+      {
+        protocol: 'https',
+        hostname: 'secure.gravatar.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.wp.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {

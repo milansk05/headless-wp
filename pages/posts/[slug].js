@@ -9,6 +9,7 @@ import Footer from '../../components/Footer';
 import PostCard from '../../components/PostCard';
 import { SiteContext } from '../_app';
 import Head from 'next/head';
+import PostContent from '../../components/PostContent';
 
 export default function Post({ post, relatedPosts = [] }) {
     const router = useRouter();
@@ -98,7 +99,7 @@ export default function Post({ post, relatedPosts = [] }) {
 
                 <article className="bg-white rounded-lg shadow-lg p-6 md:p-8 lg:p-10 max-w-4xl mx-auto mb-12">
                     <header className="mb-8">
-                        <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">{post.title}</h1>
                         <div className="text-gray-500 mb-4">
                             {formattedDate}
                         </div>
@@ -109,7 +110,7 @@ export default function Post({ post, relatedPosts = [] }) {
                                     <Link
                                         key={category.id}
                                         href={`/category/${category.slug}`}
-                                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full transition"
+                                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full transition"
                                     >
                                         {category.name}
                                     </Link>
@@ -138,23 +139,26 @@ export default function Post({ post, relatedPosts = [] }) {
                         </figure>
                     )}
 
-                    <div
-                        className="prose lg:prose-lg max-w-none"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
+                    <PostContent content={post.content} />
 
                     {post.author?.node && (
                         <div className="mt-12 pt-8 border-t border-gray-200">
                             <div className="flex items-center">
-                                {post.author.node.avatar?.url && (
+                                {post.author.node.avatar?.url ? (
                                     <div className="mr-4">
-                                        <Image
+                                        <img
                                             src={post.author.node.avatar.url}
                                             alt={post.author.node.name || 'Auteur'}
                                             width={60}
                                             height={60}
                                             className="rounded-full"
                                         />
+                                    </div>
+                                ) : (
+                                    <div className="mr-4 w-[60px] h-[60px] bg-blue-100 rounded-full flex items-center justify-center">
+                                        <span className="text-blue-800 font-bold text-xl">
+                                            {post.author.node.name?.charAt(0) || 'A'}
+                                        </span>
                                     </div>
                                 )}
                                 <div>

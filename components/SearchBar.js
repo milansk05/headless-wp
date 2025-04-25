@@ -13,17 +13,17 @@ const SearchBar = ({ className = '' }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className={`relative ${className}`}>
+        <form onSubmit={handleSubmit} className={`relative ${className} border border-gray-300 hover:border-blue-400`}>
             <input
                 type="text"
                 placeholder="Zoeken..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-4 pr-10 py-2 rounded-lg focus:outline-none text-black"
             />
             <button
                 type="submit"
-                className="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-blue-600"
+                className="absolute right-0 top-0 mt-2 mr-3 text-gray-500"
                 aria-label="Zoeken"
             >
                 <svg
