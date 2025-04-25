@@ -1,25 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import Link from 'next/link';
-import { fetchAPI } from '../lib/api';
-import { GET_ALL_PAGES } from '../lib/queries';
+import { SiteContext } from '../pages/_app';
 
 const Header = () => {
-    const [pages, setPages] = useState([]);
+    const { siteSettings } = useContext(SiteContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    useEffect(() => {
-        async function loadPages() {
-            try {
-                // Laad alleen pagina's, zonder het menu te proberen
-                const data = await fetchAPI(GET_ALL_PAGES);
-                setPages(data.pages.nodes);
-            } catch (error) {
-                console.error('Error loading navigation:', error);
-            }
-        }
-
-        loadPages();
-    }, []);
+    // Hardcoded navigatie items
+    const navigationItems = [
+        { id: 1, label: 'Home', path: '/' },
+        { id: 2, label: 'Over Mij', path: '/over-mij' },
+        { id: 3, label: 'Blog', path: '/blog' },
+        { id: 4, label: 'Contact', path: '/contact' }
+    ];
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -30,24 +23,19 @@ const Header = () => {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center">
                     <Link href="/" className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold">Mijn Blog</span>
+                        <span className="text-2xl font-bold">{siteSettings?.title || 'Mijn Blog'}</span>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:block">
                         <ul className="flex space-x-6">
-                            <li>
-                                <Link href="/" className="hover:text-blue-200 transition py-2 border-b-2 border-transparent hover:border-blue-200">
-                                    Home
-                                </Link>
-                            </li>
-                            {pages.map((page) => (
-                                <li key={page.id}>
+                            {navigationItems.map((item) => (
+                                <li key={item.id}>
                                     <Link
-                                        href={`/${page.slug}`}
+                                        href={item.path}
                                         className="hover:text-blue-200 transition py-2 border-b-2 border-transparent hover:border-blue-200"
                                     >
-                                        {page.title}
+                                        {item.label}
                                     </Link>
                                 </li>
                             ))}
@@ -90,23 +78,14 @@ const Header = () => {
                 {isMenuOpen && (
                     <nav className="md:hidden mt-4 pb-1">
                         <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    href="/"
-                                    className="block py-2 px-2 hover:bg-blue-700 rounded transition"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Home
-                                </Link>
-                            </li>
-                            {pages.map((page) => (
-                                <li key={page.id}>
+                            {navigationItems.map((item) => (
+                                <li key={item.id}>
                                     <Link
-                                        href={`/${page.slug}`}
+                                        href={item.path}
                                         className="block py-2 px-2 hover:bg-blue-700 rounded transition"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
-                                        {page.title}
+                                        {item.label}
                                     </Link>
                                 </li>
                             ))}

@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { SiteContext } from '../pages/_app';
 
 const Newsletter = () => {
+    const { siteSettings } = useContext(SiteContext);
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    // Gebruik de tekst uit WordPress of gebruik een standaardwaarde
+    const newsletterTitle = siteSettings.newsletterTitel || 'Blijf op de hoogte';
+    const newsletterText = siteSettings.newsletterTekst ||
+        'Schrijf je in voor mijn nieuwsbrief om op de hoogte te blijven van nieuwe berichten, tips en exclusieve content.';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,9 +41,9 @@ const Newsletter = () => {
     return (
         <section className="bg-gradient-to-r from-blue-100 to-indigo-100 py-12">
             <div className="container mx-auto px-4 text-center">
-                <h2 className="text-2xl font-bold mb-2">Blijf op de hoogte</h2>
+                <h2 className="text-2xl font-bold mb-2">{newsletterTitle}</h2>
                 <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-                    Schrijf je in voor mijn nieuwsbrief om op de hoogte te blijven van nieuwe berichten, tips en exclusieve content.
+                    {newsletterText}
                 </p>
 
                 <div className="max-w-md mx-auto">

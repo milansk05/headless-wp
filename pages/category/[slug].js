@@ -1,3 +1,5 @@
+// pages/category/[slug].js
+
 import { fetchAPI } from '../../lib/api';
 import { GET_CATEGORIES, GET_POSTS_BY_CATEGORY } from '../../lib/queries';
 import Link from 'next/link';
@@ -6,9 +8,12 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import PostCard from '../../components/PostCard';
 import Head from 'next/head';
+import { useContext } from 'react';
+import { SiteContext } from '../_app';
 
 export default function Category({ category, posts }) {
     const router = useRouter();
+    const { siteSettings } = useContext(SiteContext);
 
     if (router.isFallback) {
         return (
@@ -42,11 +47,17 @@ export default function Category({ category, posts }) {
         );
     }
 
+    // Meta title en description
+    const metaTitle = `Categorie: ${category.name} | ${siteSettings.title || 'Mijn Blog'}`;
+    const metaDescription = category.description
+        ? category.description
+        : `Bekijk alle berichten in de categorie ${category.name} op ${siteSettings.title || 'Mijn Blog'}.`;
+
     return (
         <div className="min-h-screen flex flex-col">
             <Head>
-                <title>Categorie: {category.name} | Mijn Blog</title>
-                <meta name="description" content={`Bekijk alle berichten in de categorie ${category.name} op Mijn Blog.`} />
+                <title>{metaTitle}</title>
+                <meta name="description" content={metaDescription} />
             </Head>
 
             <Header />
@@ -58,6 +69,9 @@ export default function Category({ category, posts }) {
 
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">Categorie: {category.name}</h1>
+                    {category.description && (
+                        <p className="text-gray-600 max-w-3xl mx-auto mb-4">{category.description}</p>
+                    )}
                     <p className="text-gray-600">
                         {posts.length} {posts.length === 1 ? 'bericht' : 'berichten'} in deze categorie
                     </p>

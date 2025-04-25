@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { fetchAPI } from '../lib/api';
 import { GET_ALL_POSTS, GET_CATEGORIES } from '../lib/queries';
@@ -9,8 +9,10 @@ import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';
 import Head from 'next/head';
 import Image from 'next/image';
+import { SiteContext } from './_app';
 
 export default function Home() {
+    const { siteSettings } = useContext(SiteContext);
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -79,8 +81,8 @@ export default function Home() {
     return (
         <div className="min-h-screen flex flex-col">
             <Head>
-                <title>Mijn Blog - Verhalen, Gedachten en Ideeën</title>
-                <meta name="description" content="Een persoonlijke blog met verhalen, gedachten en ideeën over diverse onderwerpen." />
+                <title>{siteSettings.title} - {siteSettings.description}</title>
+                <meta name="description" content={siteSettings.description} />
             </Head>
 
             <Header />
@@ -89,10 +91,9 @@ export default function Home() {
                 {/* Hero Sectie */}
                 <div className="bg-gradient-to-r from-blue-800 to-purple-800 text-white py-16 md:py-24">
                     <div className="container mx-auto px-4 text-center">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6">Mijn Blog</h1>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-6">{siteSettings.title || 'Mijn Blog'}</h1>
                         <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto mb-8">
-                            Welkom op mijn persoonlijke blog waar ik mijn gedachten,
-                            ervaringen en kennis deel.
+                            {siteSettings.description || 'Welkom op mijn persoonlijke blog waar ik mijn gedachten, ervaringen en kennis deel.'}
                         </p>
                         <div className="max-w-md mx-auto">
                             <SearchBar className="bg-white rounded-full shadow-lg" />
@@ -113,6 +114,8 @@ export default function Home() {
                                                 src={featuredPost.featuredImage.node.sourceUrl}
                                                 alt={featuredPost.featuredImage.node.altText || featuredPost.title}
                                                 className="w-full h-64 md:h-full object-cover"
+                                                width={800}
+                                                height={600}
                                             />
                                         ) : (
                                             <div className="bg-gray-200 w-full h-64 md:h-full flex items-center justify-center">
@@ -209,7 +212,7 @@ export default function Home() {
                             <div className="bg-blue-50 rounded-lg p-6">
                                 <h3 className="text-xl font-semibold mb-3">Over Mij</h3>
                                 <p className="text-gray-700 mb-4">
-                                    Hallo! Ik ben de schrijver achter deze blog. Ik deel hier mijn gedachten, ervaringen en kennis over verschillende onderwerpen.
+                                    {siteSettings.aboutText || 'Hallo! Ik ben de schrijver achter deze blog. Ik deel hier mijn gedachten, ervaringen en kennis over verschillende onderwerpen.'}
                                 </p>
                                 <Link
                                     href="/over-mij"
