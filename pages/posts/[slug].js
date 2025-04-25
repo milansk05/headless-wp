@@ -10,6 +10,7 @@ import PostCard from '../../components/PostCard';
 import { SiteContext } from '../_app';
 import Head from 'next/head';
 import PostContent from '../../components/PostContent';
+import CommentsSection from '../../components/CommentsSection';
 
 export default function Post({ post, relatedPosts = [] }) {
     const router = useRouter();
@@ -172,6 +173,9 @@ export default function Post({ post, relatedPosts = [] }) {
                     )}
                 </article>
 
+                {/* Comments Section */}
+                <CommentsSection postId={post.databaseId} />
+
                 {relatedPosts.length > 0 && (
                     <section className="mb-12">
                         <h2 className="text-2xl font-semibold mb-6 border-b pb-2">Gerelateerde berichten</h2>
@@ -182,58 +186,6 @@ export default function Post({ post, relatedPosts = [] }) {
                         </div>
                     </section>
                 )}
-
-                {/* Reacties sectie - deze kan je later inbouwen via een WordPress Comments API */}
-                <section className="max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-semibold mb-6 border-b pb-2">Reacties</h2>
-
-                    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                        <h3 className="text-xl font-medium mb-4">Laat een reactie achter</h3>
-                        <form className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Naam
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                        E-mail
-                                    </label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Reactie
-                                </label>
-                                <textarea
-                                    id="comment"
-                                    rows="4"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    required
-                                ></textarea>
-                            </div>
-                            <button
-                                type="submit"
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition"
-                            >
-                                Plaats reactie
-                            </button>
-                        </form>
-                    </div>
-                </section>
             </main>
 
             <Footer />
