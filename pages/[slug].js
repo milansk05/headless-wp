@@ -3,12 +3,37 @@ import { GET_PAGE_BY_SLUG, GET_ALL_PAGES } from '../lib/queries';
 import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useContext } from 'react';
+import Breadcrumbs from '../components/Breadcrumbs';
+import { useContext, useState, useEffect } from 'react';
 import { SiteContext } from './_app';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 export default function Page({ page }) {
     const { siteSettings } = useContext(SiteContext);
+    const router = useRouter();
+    const [breadcrumbItems, setBreadcrumbItems] = useState([]);
+
+    useEffect(() => {
+        // Stel aangepaste breadcrumbs in voor deze pagina
+        if (page) {
+            setBreadcrumbItems([
+                { breadcrumb: 'Home', href: '/' },
+                { breadcrumb: page.title, href: `/${page.slug}` }
+            ]);
+        }
+    }, [page]);
+
+    if (router.isFallback) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Pagina wordt geladen...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!page) {
         return (
@@ -35,6 +60,14 @@ export default function Page({ page }) {
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
+                {/* Breadcrumbs navigatie */}
+                <div className="mb-6">
+                    <Breadcrumbs
+                        customCrumbs={breadcrumbItems}
+                        className="py-2 text-gray-600"
+                    />
+                </div>
+
                 <article className="max-w-4xl mx-auto">
                     <h1 className="text-3xl md:text-4xl font-bold mb-6">{page.title}</h1>
 

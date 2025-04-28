@@ -5,13 +5,26 @@ import { useRouter } from 'next/router';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import PostCard from '../../components/PostCard';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import Head from 'next/head';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { SiteContext } from '../_app';
 
 export default function Category({ category, posts }) {
     const router = useRouter();
     const { siteSettings } = useContext(SiteContext);
+    const [breadcrumbItems, setBreadcrumbItems] = useState([]);
+
+    useEffect(() => {
+        // Stel aangepaste breadcrumbs in voor deze categorie
+        if (category) {
+            setBreadcrumbItems([
+                { breadcrumb: 'Home', href: '/' },
+                { breadcrumb: 'Blog', href: '/blog' },
+                { breadcrumb: `Categorie: ${category.name}`, href: `/category/${category.slug}` }
+            ]);
+        }
+    }, [category]);
 
     if (router.isFallback) {
         return (
@@ -61,9 +74,13 @@ export default function Category({ category, posts }) {
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
-                <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
-                    &larr; Terug naar home
-                </Link>
+                {/* Breadcrumbs navigatie */}
+                <div className="mb-6">
+                    <Breadcrumbs
+                        customCrumbs={breadcrumbItems}
+                        className="py-2 text-gray-600"
+                    />
+                </div>
 
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">Categorie: {category.name}</h1>

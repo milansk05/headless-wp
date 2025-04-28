@@ -4,6 +4,11 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, createContext } from 'react';
 import { fetchAPI } from '../lib/api';
 import { GET_SITE_SETTINGS, GET_SITE_OPTIONS } from '../lib/queries';
+import dynamic from 'next/dynamic';
+import FontLoader from '../components/FontLoader';
+
+// Dynamisch importeren van ScrollToTop om te voorkomen dat het serverside laadfouten geeft
+const ScrollToTop = dynamic(() => import('../components/ScrollToTop'), { ssr: false });
 
 // Context om site-instellingen te delen tussen componenten
 export const SiteContext = createContext({});
@@ -98,10 +103,18 @@ function MyApp({ Component, pageProps }) {
                 <meta name="twitter:title" content={metaTitle} />
                 <meta name="twitter:description" content={siteInfo.description} />
                 <meta name="twitter:image" content={`${siteInfo.url}/twitter-image.jpg`} />
+
+                {/* Text rendering kwaliteit */}
+                <meta name="format-detection" content="telephone=no" />
+                <meta httpEquiv="x-ua-compatible" content="ie=edge" />
             </Head>
+
+            {/* Laad onze fonts */}
+            <FontLoader />
 
             <div className="min-h-screen flex flex-col bg-gray-50">
                 <Component {...pageProps} />
+                <ScrollToTop />
             </div>
         </SiteContext.Provider>
     );

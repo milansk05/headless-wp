@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';
+import Breadcrumbs from '../components/Breadcrumbs';
 import Head from 'next/head';
 
 // GraphQL query voor zoekresultaten
@@ -36,8 +37,25 @@ export default function Search() {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [breadcrumbItems, setBreadcrumbItems] = useState([
+        { breadcrumb: 'Home', href: '/' }
+    ]);
 
     useEffect(() => {
+        // Update breadcrumbs wanneer de zoekterm verandert
+        if (searchQuery) {
+            setBreadcrumbItems([
+                { breadcrumb: 'Home', href: '/' },
+                { breadcrumb: 'Zoeken', href: '/search' },
+                { breadcrumb: `Resultaten voor: "${searchQuery}"`, href: `/search?q=${searchQuery}` }
+            ]);
+        } else {
+            setBreadcrumbItems([
+                { breadcrumb: 'Home', href: '/' },
+                { breadcrumb: 'Zoeken', href: '/search' }
+            ]);
+        }
+
         if (!searchQuery) {
             setLoading(false);
             return;
@@ -54,8 +72,8 @@ export default function Search() {
 
                 setSearchResults(data.posts.nodes);
                 setLoading(false);
-            } catch (error) {
-                console.error('Error searching posts:', error);
+            } catch (err) {
+                console.error('Error searching posts:', err);
                 setError('Er is een fout opgetreden bij het zoeken.');
                 setLoading(false);
             }
@@ -73,9 +91,13 @@ export default function Search() {
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
-                <Link href="/" className="text-blue-600 hover:underline mb-6 inline-block">
-                    &larr; Terug naar home
-                </Link>
+                {/* Breadcrumbs navigatie */}
+                <div className="mb-6">
+                    <Breadcrumbs
+                        customCrumbs={breadcrumbItems}
+                        className="py-2 text-gray-600"
+                    />
+                </div>
 
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold mb-6">

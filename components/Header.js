@@ -49,8 +49,8 @@ const Header = () => {
     return (
         <header
             className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
-                    ? 'bg-white shadow-md text-gray-800'
-                    : 'bg-gradient-to-r from-blue-800 to-purple-800 text-white'
+                ? 'bg-white shadow-md text-gray-800'
+                : 'bg-gradient-to-r from-blue-800 to-purple-800'
                 }`}
         >
             <div className="container mx-auto px-4">
@@ -61,8 +61,8 @@ const Header = () => {
                         className="flex items-center space-x-2 group"
                     >
                         <span className={`text-2xl font-bold transition-colors ${isScrolled
-                                ? 'text-blue-700 group-hover:text-blue-600'
-                                : 'text-white group-hover:text-blue-100'
+                            ? 'text-blue-700 group-hover:text-blue-600'
+                            : 'text-white group-hover:text-blue-100'
                             }`}>
                             {siteSettings?.title || 'Headless WP'}
                         </span>
@@ -76,12 +76,12 @@ const Header = () => {
                                     <Link
                                         href={item.path}
                                         className={`px-4 py-2 rounded-md transition-all duration-200 inline-block ${isActive(item.path)
-                                                ? isScrolled
-                                                    ? 'bg-blue-100 text-blue-700 font-medium'
-                                                    : 'bg-white/20 text-white font-medium'
-                                                : isScrolled
-                                                    ? 'text-gray-700 hover:bg-gray-100'
-                                                    : 'text-white hover:bg-white/10'
+                                            ? isScrolled
+                                                ? 'bg-blue-100 text-blue-700 font-medium'
+                                                : 'bg-white/20 text-white font-medium'
+                                            : isScrolled
+                                                ? 'text-gray-700 hover:bg-gray-100'
+                                                : 'text-white hover:bg-white/10'
                                             }`}
                                     >
                                         {item.label}
@@ -94,8 +94,8 @@ const Header = () => {
                     {/* Mobiele Menu Knop */}
                     <button
                         className={`md:hidden p-2 rounded-md transition-colors ${isScrolled
-                                ? 'text-gray-700 hover:bg-gray-100'
-                                : 'text-white hover:bg-white/10'
+                            ? 'text-gray-700 hover:bg-gray-100'
+                            : 'text-white hover:bg-white/10'
                             }`}
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
@@ -140,12 +140,12 @@ const Header = () => {
                                     <Link
                                         href={item.path}
                                         className={`block px-4 py-2 rounded-md transition-all duration-200 ${isActive(item.path)
-                                                ? isScrolled
-                                                    ? 'bg-blue-100 text-blue-700 font-medium'
-                                                    : 'bg-white/20 text-white font-medium'
-                                                : isScrolled
-                                                    ? 'text-gray-700 hover:bg-gray-100'
-                                                    : 'text-white hover:bg-white/10'
+                                            ? isScrolled
+                                                ? 'bg-blue-100 text-blue-700 font-medium'
+                                                : 'bg-white/20 text-white font-medium'
+                                            : isScrolled
+                                                ? 'text-gray-700 hover:bg-gray-100'
+                                                : 'text-white hover:bg-white/10'
                                             }`}
                                     >
                                         {item.label}

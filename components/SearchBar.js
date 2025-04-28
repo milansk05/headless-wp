@@ -20,6 +20,7 @@ const SearchBar = ({ className = '' }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-4 pr-10 py-2 rounded-lg focus:outline-none text-black"
+                aria-label="Zoeken op de website"
             />
             <button
                 type="submit"
@@ -45,4 +46,4 @@ const SearchBar = ({ className = '' }) => {
     );
 };
 
-export default SearchBar;
+export default SearchBar;   

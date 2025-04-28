@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';
+import Breadcrumbs from '../components/Breadcrumbs';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
@@ -16,6 +17,10 @@ export default function Blog({ initialPosts, categories }) {
     const [sortOption, setSortOption] = useState('newest');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [breadcrumbItems] = useState([
+        { breadcrumb: 'Home', href: '/' },
+        { breadcrumb: 'Blog', href: '/blog' }
+    ]);
     const postsPerPage = 9;
 
     // Filter en sorteer posts wanneer filters veranderen
@@ -136,6 +141,14 @@ export default function Blog({ initialPosts, categories }) {
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
+                {/* Breadcrumbs navigatie */}
+                <div className="mb-6">
+                    <Breadcrumbs
+                        customCrumbs={breadcrumbItems}
+                        className="py-2 text-gray-600"
+                    />
+                </div>
+
                 <div className="max-w-7xl mx-auto">
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">Blog</h1>
                     <p className="text-gray-600 mb-8">Bekijk al onze artikelen of filter op categorie en onderwerp.</p>

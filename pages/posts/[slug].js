@@ -11,13 +11,20 @@ import { SiteContext } from '../_app';
 import Head from 'next/head';
 import PostContent from '../../components/PostContent';
 import CommentsSection from '../../components/CommentsSection';
+import dynamic from 'next/dynamic';
+import Breadcrumbs from '../../components/Breadcrumbs';
+
+// Dynamisch importeren van ShareButtons voor client-side rendering
+const DynamicShareButtons = dynamic(() => import('../../components/ShareButtons'), { ssr: false });
 
 export default function Post({ post, relatedPosts = [] }) {
     const router = useRouter();
     const { siteSettings } = useContext(SiteContext);
     const [formattedDate, setFormattedDate] = useState('');
+    const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
     useEffect(() => {
+        // Bestaande code voor datum formatteren
         if (post?.date) {
             const date = new Date(post.date);
             setFormattedDate(date.toLocaleDateString('nl-NL', {
@@ -26,6 +33,15 @@ export default function Post({ post, relatedPosts = [] }) {
                 month: 'long',
                 day: 'numeric'
             }));
+        }
+
+        // Nieuwe code voor breadcrumbs
+        if (post) {
+            setBreadcrumbItems([
+                { breadcrumb: 'Home', href: '/' },
+                { breadcrumb: 'Blog', href: '/blog' },
+                { breadcrumb: post.title, href: `/posts/${post.slug}` }
+            ]);
         }
     }, [post]);
 
@@ -63,6 +79,9 @@ export default function Post({ post, relatedPosts = [] }) {
         );
     }
 
+    // Bereid de URL voor om te delen voor
+    const postUrl = `${siteSettings.url || ''}/posts/${post.slug}`;
+
     // Meta titel en beschrijving voor SEO
     const metaTitle = `${post.title} | ${siteSettings.title || 'Mijn Blog'}`;
     const metaDescription = post.excerpt
@@ -94,6 +113,14 @@ export default function Post({ post, relatedPosts = [] }) {
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
+                {/* Breadcrumbs navigatie */}
+                <div className="mb-6">
+                    <Breadcrumbs
+                        customCrumbs={breadcrumbItems}
+                        className="py-2 text-gray-600"
+                    />
+                </div>
+
                 <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
                     &larr; Terug naar overzicht
                 </Link>
@@ -140,7 +167,23 @@ export default function Post({ post, relatedPosts = [] }) {
                         </figure>
                     )}
 
+                    {/* Social share buttons - boven de content */}
+                    <DynamicShareButtons
+                        url={postUrl}
+                        title={post.title}
+                        excerpt={post.excerpt}
+                    />
+
                     <PostContent content={post.content} />
+
+                    {/* Social share buttons - onder de content */}
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                        <DynamicShareButtons
+                            url={postUrl}
+                            title={post.title}
+                            excerpt={post.excerpt}
+                        />
+                    </div>
 
                     {post.author?.node && (
                         <div className="mt-12 pt-8 border-t border-gray-200">
