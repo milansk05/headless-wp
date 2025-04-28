@@ -37,7 +37,7 @@ const Footer = () => {
             <div className="container mx-auto px-4">
                 <div className="md:flex md:justify-between">
                     <div className="mb-6 md:mb-0">
-                        <h2 className="text-xl font-bold mb-4">{siteSettings.title || 'Mijn Blog'}</h2>
+                        <h2 className="text-xl font-bold mb-4 text-white">{siteSettings.title || 'Mijn Blog'}</h2>
                         <p className="text-gray-400 max-w-sm">
                             {siteSettings.footerText || 'Een persoonlijke blog gebouwd met Next.js en WordPress als headless CMS.'}
                         </p>
@@ -79,7 +79,7 @@ const Footer = () => {
 
                     <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-6">
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Blog</h3>
+                            <h3 className="text-lg font-semibold mb-4 text-white">Blog</h3>
                             <ul className="space-y-2">
                                 <li>
                                     <Link href="/" className="text-gray-400 hover:text-white transition">
@@ -100,7 +100,7 @@ const Footer = () => {
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Categorieën</h3>
+                            <h3 className="text-lg font-semibold mb-4 text-white">Categorieën</h3>
                             <ul className="space-y-2">
                                 {categories.length > 0 ? (
                                     categories.map(category => (
@@ -119,7 +119,7 @@ const Footer = () => {
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+                            <h3 className="text-lg font-semibold mb-4 text-white">Contact</h3>
                             <ul className="space-y-2">
                                 {siteSettings.contactEmail && (
                                     <li className="flex items-center text-gray-400">

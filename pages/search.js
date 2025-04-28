@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { fetchAPI } from '../lib/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';

@@ -17,7 +17,7 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Integreer met de bestaande routestructuur
    - Verbeter de navigatie-ervaring
 
-4. **Verbeterde typografie** - Implementeer meer geavanceerde typografie-opties.
+4. ⏱️ **Verbeterde typografie** - Implementeer meer geavanceerde typografie-opties.
    - Uitbreiden van Tailwind CSS configuratie
    - Toevoegen van verschillende lettertypes en tekstgroottes
    - Verbeteren van leesbaarheid en esthetiek

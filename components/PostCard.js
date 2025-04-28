@@ -80,9 +80,9 @@ const PostCard = ({ post }) => {
 
                 <Link
                     href={`/posts/${post.slug}`}
-                    className="inline-block text-blue-600 hover:text-blue-800 font-medium"
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition"
                 >
-                    Lees verder →
+                    Lees verder
                 </Link>
             </div>
         </div>

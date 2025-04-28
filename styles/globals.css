@@ -11,11 +11,11 @@
     --font-display: 'Playfair Display', Georgia, serif;
 
     /* Kleuren voor tekst en achtergronden */
-    --color-text-primary: #1a202c;
+    /* --color-text-primary: #2d3748; */
     --color-text-secondary: #4a5568;
     --color-text-muted: #718096;
     --color-link: #3182ce;
-    --color-link-hover: #2c5282;
+    /* --color-link-hover: #ffffff; */
     --color-blockquote-border: #3182ce;
     --color-blockquote-bg: #ebf8ff;
     --color-code-bg: #f7fafc;
@@ -41,7 +41,7 @@ body {
 }
 
 /* Headings universele stijlen */
-h1,
+h1, 
 h2,
 h3,
 h4,
@@ -105,7 +105,7 @@ p {
 
 /* Link styling */
 a {
-    color: var(--color-link);
+    /* color: var(--color-link); */
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;

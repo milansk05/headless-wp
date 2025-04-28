@@ -72,21 +72,19 @@ const Header = () => {
                     <nav className="hidden md:block">
                         <ul className="flex space-x-1">
                             {navigationItems.map((item) => (
-                                <li key={item.id}>
-                                    <Link
-                                        href={item.path}
-                                        className={`px-4 py-2 rounded-md transition-all duration-200 inline-block ${isActive(item.path)
-                                            ? isScrolled
-                                                ? 'bg-blue-100 text-blue-700 font-medium'
-                                                : 'bg-white/20 text-white font-medium'
-                                            : isScrolled
-                                                ? 'text-gray-700 hover:bg-gray-100'
-                                                : 'text-white hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </li>
+                                <Link key={item.id}
+                                    href={item.path}
+                                    className={`px-4 py-2 rounded-md transition-all duration-200 inline-block ${isActive(item.path)
+                                        ? isScrolled
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'bg-white/20 text-white font-medium'
+                                        : isScrolled
+                                            ? 'text-gray-700 hover:bg-gray-100'
+                                            : 'text-white hover:bg-white/10'
+                                        }`}
+                                >
+                                    {item.label}
+                                </Link>
                             ))}
                         </ul>
                     </nav>
