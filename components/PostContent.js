@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const PostContent = ({ content }) => {
+const PostContent = ({ content, onContentParsed }) => {
     const [fontLoaded, setFontLoaded] = useState(false);
+    const contentRef = useRef(null);
 
     // Check of webfonts correct zijn geladen
     useEffect(() => {
@@ -16,8 +17,53 @@ const PostContent = ({ content }) => {
         }
     }, []);
 
+    // Stuur het contentElement door naar het parent component
+    // zodat het gebruikt kan worden om de inhoudsopgave te genereren
+    useEffect(() => {
+        if (contentRef.current && onContentParsed && typeof onContentParsed === 'function') {
+            onContentParsed(contentRef.current);
+        }
+    }, [content, onContentParsed]);
+
+    // Voeg IDs toe aan alle h1, h2, h3, h4 elementen voor de inhoudsopgave
+    useEffect(() => {
+        if (contentRef.current) {
+            const addIdsToHeadings = () => {
+                const headings = contentRef.current.querySelectorAll('h1, h2, h3, h4');
+                headings.forEach((heading, index) => {
+                    if (!heading.id) {
+                        // Creëer een slug op basis van de heading tekst
+                        let slug = heading.textContent
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, '') // Verwijder niet-woord tekens
+                            .replace(/[\s_-]+/g, '-') // Vervang whitespace en underscores door hyphens
+                            .replace(/^-+|-+$/g, ''); // Verwijder leading/trailing hyphens
+
+                        // Als de slug leeg is of alleen uit getallen bestaat, gebruik een generiek id
+                        if (!slug || /^\d+$/.test(slug)) {
+                            slug = `section-${index}`;
+                        }
+
+                        // Zorg ervoor dat de ID uniek is
+                        let uniqueSlug = slug;
+                        let counter = 1;
+                        while (document.getElementById(uniqueSlug)) {
+                            uniqueSlug = `${slug}-${counter}`;
+                            counter++;
+                        }
+
+                        heading.id = uniqueSlug;
+                    }
+                });
+            };
+
+            addIdsToHeadings();
+        }
+    }, [content]);
+
     return (
         <article
+            ref={contentRef}
             className={`
                 prose prose-lg lg:prose-xl max-w-none
                 ${fontLoaded ? 'font-loaded' : 'font-loading'}
@@ -27,7 +73,7 @@ const PostContent = ({ content }) => {
                 prose-headings:font-semibold 
                 prose-headings:text-gray-900 
                 prose-headings:tracking-tight
-                prose-headings:scroll-m-20
+                prose-headings:scroll-mt-20
                 
                 /* H1 stijlen */
                 prose-h1:text-3xl 

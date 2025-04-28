@@ -2,14 +2,18 @@ import { fetchAPI } from '../../lib/api';
 import { GET_ALL_POSTS, GET_POST_BY_SLUG, GET_RELATED_POSTS } from '../../lib/queries';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import Image from 'next/image';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import PostCard from '../../components/PostCard';
 import { SiteContext } from '../_app';
 import Head from 'next/head';
+import { formatReadingTime } from '../../utils/readingTime';
 import PostContent from '../../components/PostContent';
+import TableOfContents from '../../components/TableOfContents';
+import FloatingTOC from '../../components/FloatingTOC';
+import ReadingProgress from '../../components/ReadingProgress';
 import CommentsSection from '../../components/CommentsSection';
 import dynamic from 'next/dynamic';
 import Breadcrumbs from '../../components/Breadcrumbs';
@@ -22,6 +26,9 @@ export default function Post({ post, relatedPosts = [] }) {
     const { siteSettings } = useContext(SiteContext);
     const [formattedDate, setFormattedDate] = useState('');
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
+    const [contentHtml, setContentHtml] = useState('');
+    const [showToc, setShowToc] = useState(false);
+    const [readingTime, setReadingTime] = useState('');
 
     useEffect(() => {
         // Bestaande code voor datum formatteren
@@ -42,6 +49,30 @@ export default function Post({ post, relatedPosts = [] }) {
                 { breadcrumb: 'Blog', href: '/blog' },
                 { breadcrumb: post.title, href: `/posts/${post.slug}` }
             ]);
+
+            // Controleer of de post content headings heeft die een inhoudsopgave nodig maken
+            if (post.content) {
+                setContentHtml(post.content);
+
+                // Maak een tijdelijke div om de content te parsen
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = post.content;
+
+                // Tel het aantal h2 en h3 tags
+                const headingsCount = tempDiv.querySelectorAll('h2, h3').length;
+
+                // Toon de inhoudsopgave alleen als er voldoende headings zijn
+                setShowToc(headingsCount >= 3);
+
+                // Bereken de leestijd
+                try {
+                    const readingTimeText = formatReadingTime(post.content);
+                    setReadingTime(readingTimeText);
+                } catch (error) {
+                    console.error('Fout bij het berekenen van de leestijd:', error);
+                    setReadingTime('');
+                }
+            }
         }
     }, [post]);
 
@@ -110,6 +141,14 @@ export default function Post({ post, relatedPosts = [] }) {
                 ))}
             </Head>
 
+            {/* Leesvoortgangsbalk */}
+            <ReadingProgress
+                target="article"
+                height={4}
+                color="bg-blue-600"
+                position="top"
+            />
+
             <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
@@ -131,6 +170,16 @@ export default function Post({ post, relatedPosts = [] }) {
                         <div className="text-gray-500 mb-4">
                             {formattedDate}
                         </div>
+
+                        {/* Leestijd */}
+                        {readingTime && (
+                            <div className="flex items-center text-sm text-gray-500 mb-4">
+                                <svg className="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {readingTime}
+                            </div>
+                        )}
 
                         {post.categories?.nodes?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-4">
@@ -174,7 +223,27 @@ export default function Post({ post, relatedPosts = [] }) {
                         excerpt={post.excerpt}
                     />
 
-                    <PostContent content={post.content} />
+                    {/* Inhoudsopgave - toon alleen als er voldoende headings zijn */}
+                    {showToc && contentHtml && (
+                        <TableOfContents
+                            content={contentHtml}
+                            enableHighlight={true}
+                            headingSelector={['h2', 'h3']}
+                            showRelated={true}
+                            showActions={true}
+                            articleTitle={post.title}
+                            articleUrl={postUrl}
+                            className="my-6"
+                        />
+                    )}
+
+                    <PostContent
+                        content={post.content}
+                        onContentParsed={(element) => {
+                            // Deze callback functie kan gebruikt worden om het element
+                            // te analyseren en mogelijk de inhoudsopgave-status bij te werken
+                        }}
+                    />
 
                     {/* Social share buttons - onder de content */}
                     <div className="mt-8 pt-6 border-t border-gray-200">
@@ -230,6 +299,15 @@ export default function Post({ post, relatedPosts = [] }) {
                     </section>
                 )}
             </main>
+
+            {/* Floating TOC voor langere artikelen */}
+            {showToc && contentHtml && (
+                <FloatingTOC
+                    content={contentHtml}
+                    headingSelector={['h2', 'h3']}
+                    position="right"
+                />
+            )}
 
             <Footer />
         </div>
