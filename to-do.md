@@ -23,12 +23,12 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Verbeteren van leesbaarheid en esthetiek
 
 ## Fase 2: Middelmatige Uitbreidingen
-5. **Tabel van inhoud** - Genereer automatisch een inhoudsopgave voor langere artikelen.
+5. ✅ **Tabel van inhoud** - Genereer automatisch een inhoudsopgave voor langere artikelen.
    - Analyseer content van posts om secties te identificeren
    - Maak een navigeerbare inhoudsopgave
    - Verbeter de gebruikerservaring voor langere artikelen
 
-6. **Cookie consent banner** - Implementeer een GDPR-compliant cookie consent oplossing.
+6. ✅ **Cookie consent banner** - Implementeer een GDPR-compliant cookie consent oplossing.
    - Ontwikkel een cookie consent banner
    - Implementeer cookie management
    - Zorg voor GDPR compliance

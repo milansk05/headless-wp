@@ -3,6 +3,7 @@ import { useContext, useState, useEffect } from 'react';
 import { SiteContext } from '../pages/_app';
 import { fetchAPI } from '../lib/api';
 import { GET_CATEGORIES } from '../lib/queries';
+import CookieSettingsButton from './CookieSettingsButton';
 
 const Footer = () => {
     const { siteSettings } = useContext(SiteContext);
@@ -96,6 +97,11 @@ const Footer = () => {
                                         Contact
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link href="/privacy" className="text-gray-400 hover:text-white transition">
+                                        Privacybeleid
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
 
@@ -155,8 +161,13 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-gray-400">
                     <p>{copyrightText}</p>
+
+                    {/* Cookie Settings Button */}
+                    <div className="mt-4 md:mt-0">
+                        <CookieSettingsButton variant="text" />
+                    </div>
                 </div>
             </div>
         </footer>

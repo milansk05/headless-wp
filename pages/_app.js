@@ -7,8 +7,10 @@ import { GET_SITE_SETTINGS, GET_SITE_OPTIONS } from '../lib/queries';
 import dynamic from 'next/dynamic';
 import FontLoader from '../components/FontLoader';
 
-// Dynamisch importeren van ScrollToTop om te voorkomen dat het serverside laadfouten geeft
+// Dynamisch importeren van componenten
 const ScrollToTop = dynamic(() => import('../components/ScrollToTop'), { ssr: false });
+const CookieConsent = dynamic(() => import('../components/CookieConsent'), { ssr: false });
+const CookieManager = dynamic(() => import('../components/CookieManager'), { ssr: false });
 
 // Context om site-instellingen te delen tussen componenten
 export const SiteContext = createContext({});
@@ -22,6 +24,47 @@ function MyApp({ Component, pageProps }) {
     });
     const [siteOptions, setSiteOptions] = useState({});
     const [loading, setLoading] = useState(true);
+
+    // Referentie naar de cookie consent component functie
+    const [openCookieConsentModal, setOpenCookieConsentModal] = useState(null);
+
+    // Maak de openCookieConsentModal functie beschikbaar voor componenten
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.openCookieConsentModal = openCookieConsentModal;
+        }
+    }, [openCookieConsentModal]);
+
+    // Cookie consent handlers
+    const handleAcceptAllCookies = (preferences) => {
+        console.log('Alle cookies geaccepteerd:', preferences);
+
+        // Dispatch event voor andere componenten die op cookie wijzigingen reageren
+        if (typeof window !== 'undefined') {
+            const event = new CustomEvent('cookieConsentChanged', { detail: preferences });
+            window.dispatchEvent(event);
+        }
+    };
+
+    const handleRejectAllCookies = (preferences) => {
+        console.log('Niet-essentiële cookies afgewezen:', preferences);
+
+        // Dispatch event voor andere componenten
+        if (typeof window !== 'undefined') {
+            const event = new CustomEvent('cookieConsentChanged', { detail: preferences });
+            window.dispatchEvent(event);
+        }
+    };
+
+    const handleSavePreferences = (preferences) => {
+        console.log('Cookie voorkeuren opgeslagen:', preferences);
+
+        // Dispatch event voor andere componenten
+        if (typeof window !== 'undefined') {
+            const event = new CustomEvent('cookieConsentChanged', { detail: preferences });
+            window.dispatchEvent(event);
+        }
+    };
 
     // Alle site-instellingen uit WordPress ophalen
     useEffect(() => {
@@ -83,6 +126,9 @@ function MyApp({ Component, pageProps }) {
         ...siteOptions
     };
 
+    // Controleer of er een privacy pagina bestaat
+    const hasPrivacyPage = Boolean(siteOptions?.privacyPaginaUrl);
+
     return (
         <SiteContext.Provider value={{ siteSettings, loading }}>
             <Head>
@@ -91,22 +137,8 @@ function MyApp({ Component, pageProps }) {
                 <meta name="description" content={siteInfo.description} />
                 <link rel="icon" href="/favicon.ico" />
 
-                {/* Open Graph tags */}
-                <meta property="og:type" content="website" />
-                <meta property="og:title" content={metaTitle} />
-                <meta property="og:description" content={siteInfo.description} />
-                <meta property="og:url" content={siteInfo.url} />
-                <meta property="og:image" content={`${siteInfo.url}/og-image.jpg`} />
-
-                {/* Twitter Card tags */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={metaTitle} />
-                <meta name="twitter:description" content={siteInfo.description} />
-                <meta name="twitter:image" content={`${siteInfo.url}/twitter-image.jpg`} />
-
-                {/* Text rendering kwaliteit */}
-                <meta name="format-detection" content="telephone=no" />
-                <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+                {/* Cookie vooraf verklaring voor transparantie en GDPR compliance */}
+                <meta name="cookie-policy" content="By using this site, you consent to our use of necessary cookies. Additional tracking and analytics cookies will only be used with your explicit permission." />
             </Head>
 
             {/* Laad onze fonts */}
@@ -115,6 +147,32 @@ function MyApp({ Component, pageProps }) {
             <div className="min-h-screen flex flex-col bg-gray-50">
                 <Component {...pageProps} />
                 <ScrollToTop />
+
+                {/* Cookie Manager - initialiseert de tracking tools op basis van consent */}
+                <CookieManager
+                    googleAnalyticsId={siteOptions?.googleAnalyticsId}
+                    facebookPixelId={siteOptions?.facebookPixelId}
+                    hotjarId={siteOptions?.hotjarId}
+                    cookieExpireDays={siteOptions?.cookieExpireDays || 365}
+                />
+
+                {/* Cookie Consent Banner */}
+                <CookieConsent
+                    privacyPageExists={hasPrivacyPage}
+                    privacyPageUrl={siteOptions?.privacyPaginaUrl || '/privacy'}
+                    onAcceptAll={handleAcceptAllCookies}
+                    onRejectAll={handleRejectAllCookies}
+                    onSavePreferences={handleSavePreferences}
+                    setOpenConsentModal={setOpenCookieConsentModal}
+                    cookieBannerTitle={siteOptions?.cookieBannerTitel}
+                    cookieBannerText={siteOptions?.cookieBannerTekst}
+                    cookieDescriptions={{
+                        necessary: siteOptions?.cookieNecessaryDesc,
+                        functional: siteOptions?.cookieFunctionalDesc,
+                        analytics: siteOptions?.cookieAnalyticsDesc,
+                        marketing: siteOptions?.cookieMarketingDesc
+                    }}
+                />
             </div>
         </SiteContext.Provider>
     );
