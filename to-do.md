@@ -38,7 +38,7 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Ontwikkel een favorieten interface
    - Bijhouden van gebruikersvoorkeuren
 
-8. **Verbeterde afbeeldingsbehandeling** - Optimaliseer afbeeldingsweergave.
+8. ⏱️ **Verbeterde afbeeldingsbehandeling** - Optimaliseer afbeeldingsweergave.
    - Verbeter lazy loading strategieën
    - Implementeer responsive images
    - Optimaliseer afbeeldingsgrootte en kwaliteit

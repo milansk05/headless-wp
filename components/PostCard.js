@@ -1,7 +1,29 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import FeaturedImage from './FeaturedImage';
 
-const PostCard = ({ post }) => {
+/**
+ * OptimizedPostCard - Verbeterde versie van PostCard component met geoptimaliseerde afbeeldingen
+ * 
+ * @param {Object} props
+ * @param {Object} props.post - WordPress post object
+ * @param {boolean} props.priority - Of deze kaart prioriteit heeft voor LCP
+ * @param {string} props.className - Extra CSS klassen
+ * @param {number} props.imageHeight - Vaste hoogte voor de afbeelding
+ * @param {boolean} props.showExcerpt - Toon post excerpt
+ * @param {boolean} props.showCategories - Toon post categorieën
+ * @param {boolean} props.showReadMore - Toon 'Lees verder' knop
+ * @param {number} props.excerptLength - Maximale lengte van het excerpt
+ */
+const OptimizedPostCard = ({
+    post,
+    priority = false,
+    className = '',
+    imageHeight = 200,
+    showExcerpt = true,
+    showCategories = true,
+    showReadMore = true,
+    excerptLength = 120
+}) => {
     // Formatteer de datum
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -13,7 +35,7 @@ const PostCard = ({ post }) => {
     };
 
     // Beperk de lengte van het uittreksel om te lange voorvertoningen te voorkomen
-    const truncateExcerpt = (excerpt, maxLength = 120) => {
+    const truncateExcerpt = (excerpt, maxLength = excerptLength) => {
         // Verwijder HTML-tags
         const plainText = excerpt.replace(/<[^>]+>/g, '');
 
@@ -27,26 +49,23 @@ const PostCard = ({ post }) => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+        <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${className}`}>
             <Link href={`/posts/${post.slug}`}>
-                <div className="h-48 overflow-hidden relative">
-                    {post.featuredImage?.node ? (
-                        <Image
-                            src={post.featuredImage.node.sourceUrl}
-                            alt={post.featuredImage.node.altText || post.title}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-300"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                    ) : (
-                        <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-                            <span className="text-gray-500">Geen afbeelding</span>
-                        </div>
-                    )}
+                <div className="relative h-48 overflow-hidden">
+                    <FeaturedImage
+                        featuredImage={post.featuredImage}
+                        postTitle={post.title}
+                        height={imageHeight}
+                        containerClass="col-12"
+                        linkToPost={false}
+                        priority={priority}
+                        className="w-full h-full transition-transform duration-500 hover:scale-105"
+                    />
                 </div>
             </Link>
+
             <div className="p-5">
-                {post.categories?.nodes?.length > 0 && (
+                {showCategories && post.categories?.nodes?.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
                         {post.categories.nodes.slice(0, 2).map(category => (
                             <Link
@@ -57,6 +76,13 @@ const PostCard = ({ post }) => {
                                 {category.name}
                             </Link>
                         ))}
+
+                        {/* Als er meer dan 2 categorieën zijn, toon het aantal extra */}
+                        {post.categories.nodes.length > 2 && (
+                            <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
+                                +{post.categories.nodes.length - 2} meer
+                            </span>
+                        )}
                     </div>
                 )}
 
@@ -70,23 +96,27 @@ const PostCard = ({ post }) => {
                     </h3>
                 </Link>
 
-                <div className="text-gray-600 mb-4">
-                    {post.excerpt ? (
-                        <p>{truncateExcerpt(post.excerpt)}</p>
-                    ) : (
-                        <p>Klik om het volledige bericht te lezen.</p>
-                    )}
-                </div>
+                {showExcerpt && (
+                    <div className="text-gray-600 mb-4">
+                        {post.excerpt ? (
+                            <p>{truncateExcerpt(post.excerpt)}</p>
+                        ) : (
+                            <p>Klik om het volledige bericht te lezen.</p>
+                        )}
+                    </div>
+                )}
 
-                <Link
-                    href={`/posts/${post.slug}`}
-                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition"
-                >
-                    Lees verder
-                </Link>
+                {showReadMore && (
+                    <Link
+                        href={`/posts/${post.slug}`}
+                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition"
+                    >
+                        Lees verder
+                    </Link>
+                )}
             </div>
         </div>
     );
 };
 
-export default PostCard;
+export default OptimizedPostCard;

@@ -3,20 +3,20 @@ import { GET_ALL_POSTS, GET_POST_BY_SLUG, GET_RELATED_POSTS } from '../../lib/qu
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useContext, useCallback } from 'react';
-import Image from 'next/image';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import PostCard from '../../components/PostCard';
+import OptimizedPostCard from '../../components/PostCard';
 import { SiteContext } from '../_app';
 import Head from 'next/head';
 import { formatReadingTime } from '../../utils/readingTime';
-import PostContent from '../../components/PostContent';
+import OptimizedPostContent from '../../components/PostContent';
 import TableOfContents from '../../components/TableOfContents';
 import FloatingTOC from '../../components/FloatingTOC';
 import ReadingProgress from '../../components/ReadingProgress';
 import CommentsSection from '../../components/CommentsSection';
 import dynamic from 'next/dynamic';
 import Breadcrumbs from '../../components/Breadcrumbs';
+import FeaturedImage from '../../components/FeaturedImage';
 
 // Dynamisch importeren van ShareButtons voor client-side rendering
 const DynamicShareButtons = dynamic(() => import('../../components/ShareButtons'), { ssr: false });
@@ -139,6 +139,19 @@ export default function Post({ post, relatedPosts = [] }) {
                 {post.categories?.nodes?.map((category, index) => (
                     <meta key={index} property="article:section" content={category.name} />
                 ))}
+
+                {/* Preload LCP image */}
+                {post.featuredImage?.node && (
+                    <>
+                        <link
+                            rel="preload"
+                            as="image"
+                            href={post.featuredImage.node.sourceUrl}
+                            imagesrcset={`${post.featuredImage.node.sourceUrl}?w=640 640w, ${post.featuredImage.node.sourceUrl}?w=750 750w, ${post.featuredImage.node.sourceUrl}?w=1080 1080w`}
+                            imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 640px, 1080px"
+                        />
+                    </>
+                )}
             </Head>
 
             {/* Leesvoortgangsbalk */}
@@ -196,24 +209,18 @@ export default function Post({ post, relatedPosts = [] }) {
                         )}
                     </header>
 
+                    {/* Geoptimaliseerde featured image */}
                     {post.featuredImage?.node && (
-                        <figure className="mb-8">
-                            <div className="relative w-full h-[400px] md:h-[500px]">
-                                <Image
-                                    src={post.featuredImage.node.sourceUrl}
-                                    alt={post.featuredImage.node.altText || post.title}
-                                    fill
-                                    className="object-cover rounded-lg shadow-md"
-                                    priority={true}
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                                />
-                            </div>
-                            {post.featuredImage.node.caption && (
-                                <figcaption className="text-sm text-gray-500 mt-2 text-center"
-                                    dangerouslySetInnerHTML={{ __html: post.featuredImage.node.caption }}
-                                />
-                            )}
-                        </figure>
+                        <div className="mb-8">
+                            <FeaturedImage
+                                featuredImage={post.featuredImage}
+                                postTitle={post.title}
+                                priority={true}
+                                isHero={true}
+                                objectFit="cover"
+                                className="rounded-lg shadow-md overflow-hidden"
+                            />
+                        </div>
                     )}
 
                     {/* Social share buttons - boven de content */}
@@ -237,7 +244,8 @@ export default function Post({ post, relatedPosts = [] }) {
                         />
                     )}
 
-                    <PostContent
+                    {/* Geoptimaliseerde post content */}
+                    <OptimizedPostContent
                         content={post.content}
                         onContentParsed={(element) => {
                             // Deze callback functie kan gebruikt worden om het element
@@ -258,12 +266,17 @@ export default function Post({ post, relatedPosts = [] }) {
                         <div className="mt-12 pt-8 border-t border-gray-200">
                             <div className="flex items-center">
                                 {post.author.node.avatar?.url ? (
-                                    <div className="mr-4 relative w-[60px] h-[60px]">
-                                        <Image
-                                            src={post.author.node.avatar.url}
-                                            alt={post.author.node.name || 'Auteur'}
+                                    <div className="mr-4 relative w-[60px] h-[60px] rounded-full overflow-hidden">
+                                        <FeaturedImage
+                                            featuredImage={{
+                                                node: {
+                                                    sourceUrl: post.author.node.avatar.url,
+                                                    altText: post.author.node.name || 'Auteur'
+                                                }
+                                            }}
                                             width={60}
                                             height={60}
+                                            objectFit="cover"
                                             className="rounded-full"
                                         />
                                     </div>
@@ -288,12 +301,18 @@ export default function Post({ post, relatedPosts = [] }) {
                 {/* Reacties sectie */}
                 <CommentsSection postId={post.databaseId} />
 
+                {/* Gerelateerde berichten met geoptimaliseerde kaarten */}
                 {relatedPosts.length > 0 && (
                     <section className="mb-12">
                         <h2 className="text-2xl font-semibold mb-6 border-b pb-2">Gerelateerde berichten</h2>
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {relatedPosts.map(relatedPost => (
-                                <PostCard key={relatedPost.id} post={relatedPost} />
+                            {relatedPosts.map((relatedPost, index) => (
+                                <OptimizedPostCard
+                                    key={relatedPost.id}
+                                    post={relatedPost}
+                                    showExcerpt={false}
+                                    priority={index === 0} // Alleen eerste geladen post prioriteit geven
+                                />
                             ))}
                         </div>
                     </section>

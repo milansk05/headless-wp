@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
+import OptimizedContent from './OptimizedContent';
 
-const PostContent = ({ content, onContentParsed }) => {
+/**
+ * OptimizedPostContent - Component voor het weergeven van WordPress postinhoud met geoptimaliseerde afbeeldingen
+ * 
+ * Dit is een aangepaste versie van de PostContent component die OptimizedContent gebruikt voor betere afbeeldingsverwerking.
+ * 
+ * @param {Object} props Component properties
+ * @param {string} props.content HTML content van het bericht
+ * @param {function} props.onContentParsed Callback functie die wordt aangeroepen na het parsen van content
+ */
+const OptimizedPostContent = ({
+    content,
+    onContentParsed = null
+}) => {
     const [fontLoaded, setFontLoaded] = useState(false);
     const contentRef = useRef(null);
 
@@ -16,14 +29,6 @@ const PostContent = ({ content, onContentParsed }) => {
             return () => clearTimeout(timer);
         }
     }, []);
-
-    // Stuur het contentElement door naar het parent component
-    // zodat het gebruikt kan worden om de inhoudsopgave te genereren
-    useEffect(() => {
-        if (contentRef.current && onContentParsed && typeof onContentParsed === 'function') {
-            onContentParsed(contentRef.current);
-        }
-    }, [content, onContentParsed]);
 
     // Voeg IDs toe aan alle h1, h2, h3, h4 elementen voor de inhoudsopgave
     useEffect(() => {
@@ -60,6 +65,14 @@ const PostContent = ({ content, onContentParsed }) => {
             addIdsToHeadings();
         }
     }, [content]);
+
+    // Callback voor wanneer de content is geparseerd
+    const handleContentParsed = (parsedElement) => {
+        // Forwarden naar de onContentParsed prop als die is meegegeven
+        if (onContentParsed && typeof onContentParsed === 'function') {
+            onContentParsed(parsedElement);
+        }
+    };
 
     return (
         <article
@@ -170,10 +183,45 @@ const PostContent = ({ content, onContentParsed }) => {
                 prose-figure:my-8
                 prose-img:rounded-lg
                 prose-img:shadow-md
+                
+                /* Extra stijlen voor geoptimaliseerde afbeeldingen */
+                [&_.optimized-image-container]:my-8
+                [&_.optimized-image-container]:rounded-lg
+                [&_.optimized-image-container]:overflow-hidden
+                [&_.optimized-image-container]:shadow-md
+                [&_.optimized-image-container_img]:w-full
+                [&_.optimized-image-container_img]:h-auto
+                [&_.optimized-image-container_img]:rounded-lg
+                [&_.optimized-image-container_figcaption]:text-center
+                [&_.optimized-image-container_figcaption]:text-sm
+                [&_.optimized-image-container_figcaption]:text-gray-600
+                [&_.optimized-image-container_figcaption]:mt-2
+                [&_.optimized-image-container_figcaption]:px-4
+                
+                /* Galerij stijlen */
+                [&_.wp-block-gallery]:my-8
+                [&_.gallery-grid]:gap-4
+                [&_.gallery-item]:rounded-lg
+                [&_.gallery-item]:overflow-hidden
+                [&_.gallery-item]:shadow-sm
+                [&_.gallery-item]:transition-shadow
+                [&_.gallery-item:hover]:shadow-md
+                [&_.gallery-item_img]:w-full
+                [&_.gallery-item_img]:h-auto
+                [&_.gallery-item_img]:rounded-lg
+                [&_.gallery-item_figcaption]:text-center
+                [&_.gallery-item_figcaption]:text-xs
+                [&_.gallery-item_figcaption]:text-gray-600
+                [&_.gallery-item_figcaption]:mt-1
+                [&_.gallery-item_figcaption]:px-2
             `}
-            dangerouslySetInnerHTML={{ __html: content }}
-        />
+        >
+            <OptimizedContent
+                content={content}
+                onContentParsed={handleContentParsed}
+            />
+        </article>
     );
 };
 
-export default PostContent;
+export default OptimizedPostContent;
