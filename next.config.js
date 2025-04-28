@@ -21,8 +21,8 @@ const nextConfig = {
       's2.wp.com',
 
       // WordPress media subdomeinen - voeg je eigen WordPress domein toe
-      'example.com', // vervang met je eigen domein
-      'media.example.com', // vervang met je eigen media subdomein
+      'http://headless-wp.local/', // vervang met je eigen domein
+      'http://headless-wp.local/wp-admin/upload.php/', // vervang met je eigen media subdomein
 
       // Placeholder afbeeldingsdiensten
       'placehold.it',
@@ -71,18 +71,11 @@ const nextConfig = {
     // Kwaliteitsniveau voor afbeeldingsoptimalisatie (0-100)
     // Lagere waarde = kleinere bestanden, minder kwaliteit
     // Hogere waarde = grotere bestanden, betere kwaliteit
+    quality: 80,
 
     // Schakel automatische minimization in (in productie)
     minimumCacheTTL: 60, // Caching in seconden
     dangerouslyAllowSVG: false, // SVG's alleen toestaan als je ze vertrouwt
-  },
-
-  // Image optimization settings
-  output: {
-    // Adding quality here as part of global output settings
-    images: {
-      quality: 80,
-    },
   },
 
   // Proxying van WordPress API requests voor betere CORS support

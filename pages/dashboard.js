@@ -1,6 +1,3 @@
-// VOORBEELD 2: Conditional rendering in een pagina
-// Bestand: pages/dashboard.js
-
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';

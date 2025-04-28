@@ -43,7 +43,7 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Implementeer responsive images
    - Optimaliseer afbeeldingsgrootte en kwaliteit
 
-9. **Donkere modus (Dark Mode)** - Implementeer een toggle voor lichte/donkere modus.
+9. ❌ **Donkere modus (Dark Mode)** - Implementeer een toggle voor lichte/donkere modus.
    - Ontwikkel een kleurenschema voor donkere modus
    - Implementeer toggle functionaliteit
    - Gebruik Tailwind Dark Mode ondersteuning
@@ -85,3 +85,32 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
     - Configureer internationalisatiesysteem
     - Integreer met WordPress meertaligheidsplugins
     - Vertaal UI-componenten en content
+
+
+
+
+Errors momenteel:
+
+   $ npm run dev
+   > headless-wp-frontend@0.1.0 dev
+   > next dev --turbopack
+   Invalid next.config.js options detected: 
+   - Unrecognized key(s) in object: 'quality' at "images"
+   See more info here: https://nextjs.org/docs/messages/invalid-next-config
+
+   OptimizedContent.js:
+   - 'ImageGallery' is declared but its value is never read.
+   - 'OptiImage' is declared but its value is never read.
+
+   posts/[slug].js:
+   - 'useCallback' is declared but its value is never read.
+
+   dashboard.js:
+   - All imports in import declaration are unused. (useState, useEffect)
+   - 'updatePreferences' is declared but its value is never read.
+
+   privacy.js:
+   - 'openCookieSettings' is declared but its value is never read.
+
+
+   Als er meer values "never read" of unused zijn die ik hier niet heb genoemd, pas die dan aan voor mij.
