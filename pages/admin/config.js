@@ -54,7 +54,6 @@ const ConfigPage = () => {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 };

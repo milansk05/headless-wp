@@ -104,7 +104,6 @@ export default function Post({ post, relatedPosts = [] }) {
                         </Link>
                     </div>
                 </div>
-                <Footer />
             </div>
         );
     }
@@ -330,7 +329,6 @@ export default function Post({ post, relatedPosts = [] }) {
                 />
             )}
 
-            <Footer />
         </div>
     );
 }

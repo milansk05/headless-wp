@@ -308,7 +308,6 @@ export default function Blog({ initialPosts, categories }) {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }

@@ -1,3 +1,4 @@
+// components/ResponsiveHeader.js
 import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -5,14 +6,13 @@ import { SiteContext } from '../pages/_app';
 import { getBookmarks } from '../utils/bookmarkUtils';
 import SearchBar from './SearchBar';
 import MobileMenuBar from './MobileMenuBar';
-import MobileDrawer from './MobileDrawer';
 import MobileNavigation from './MobileNavigation';
-import MenuOverlay from './MenuOverlay';
-import DesktopNavigation from './DesktopNavigation';
-import dynamic from 'next/dynamic';
+import { fetchAPI } from '../lib/api';
+import { GET_ALL_POSTS } from '../lib/queries';
 
 /**
  * ResponsiveHeader - Geïntegreerde header component met mobiele en desktop navigatie
+ * en artikel dropdown
  * 
  * @component
  */
@@ -24,7 +24,26 @@ const ResponsiveHeader = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [menuType, setMenuType] = useState('drawer'); // 'drawer', 'overlay', or 'fullscreen'
     const [isMobile, setIsMobile] = useState(false);
+    const [recentPosts, setRecentPosts] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const router = useRouter();
+
+    // Load recent posts for dropdown
+    useEffect(() => {
+        const fetchRecentPosts = async () => {
+            try {
+                const data = await fetchAPI(GET_ALL_POSTS);
+                if (data?.posts?.nodes) {
+                    // Take most recent 5 posts
+                    setRecentPosts(data.posts.nodes.slice(0, 5));
+                }
+            } catch (error) {
+                console.error('Error fetching recent posts:', error);
+            }
+        };
+
+        fetchRecentPosts();
+    }, []);
 
     // Complete navigation structure with dropdown support
     const navigationItems = [
@@ -47,55 +66,6 @@ const ResponsiveHeader = () => {
     const secondaryNavigationItems = [
         { id: 101, label: 'Dashboard', path: '/dashboard' },
         { id: 102, label: 'Privacy', path: '/privacy' },
-    ];
-
-    // MegaMenu configurations
-    const megaMenuConfig = [
-        {
-            itemId: 2, // Blog item
-            type: 'featured',
-            categoriesTitle: 'Populaire categorieën',
-            featuredTitle: 'Uitgelichte artikelen',
-            categories: [
-                { label: 'Technologie', url: '/category/technologie' },
-                { label: 'Reizen', url: '/category/reizen' },
-                { label: 'Koken', url: '/category/koken' },
-                { label: 'Lifestyle', url: '/category/lifestyle' },
-                { label: 'Gezondheid', url: '/category/gezondheid' },
-                { label: 'Alle categorieën', url: '/categories' }
-            ],
-            featured: [
-                {
-                    label: 'De beste reisbestemmingen van 2025',
-                    url: '/posts/beste-reisbestemmingen-2025',
-                    image: '/images/travel.jpg'
-                },
-                {
-                    label: 'Technologische trends om in de gaten te houden',
-                    url: '/posts/tech-trends-2025',
-                    image: '/images/tech.jpg'
-                },
-                {
-                    label: 'Gezond leven: Tips en trucs',
-                    url: '/posts/gezond-leven-tips',
-                    image: '/images/health.jpg'
-                },
-                {
-                    label: 'De lekkerste recepten voor het najaar',
-                    url: '/posts/recepten-najaar',
-                    image: '/images/food.jpg'
-                }
-            ],
-            footerLinks: [
-                { label: 'Nieuwste artikelen', url: '/blog?sort=newest' },
-                { label: 'Populaire artikelen', url: '/blog?sort=popular' },
-                { label: 'Archieven', url: '/archive' }
-            ],
-            ctaButton: {
-                label: 'Alle artikelen',
-                url: '/blog'
-            }
-        }
     ];
 
     // Check device type and set menu type based on window width
@@ -162,6 +132,7 @@ const ResponsiveHeader = () => {
     useEffect(() => {
         setIsMenuOpen(false);
         setIsSearchOpen(false);
+        setDropdownOpen(false);
     }, [router.asPath]);
 
     // Toggle menu open/closed
@@ -169,55 +140,9 @@ const ResponsiveHeader = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
-    // Render the appropriate mobile menu based on type
-    const renderMobileMenu = () => {
-        switch (menuType) {
-            case 'fullscreen':
-                return (
-                    <MenuOverlay
-                        isOpen={isMenuOpen}
-                        onClose={() => setIsMenuOpen(false)}
-                        navigationItems={[...navigationItems, ...secondaryNavigationItems]}
-                        darkMode={!isScrolled}
-                        siteTitle={siteSettings?.title || 'Mijn Blog'}
-                    />
-                );
-            case 'overlay':
-                return (
-                    <MobileDrawer
-                        isOpen={isMenuOpen}
-                        onClose={() => setIsMenuOpen(false)}
-                        position="bottom"
-                        className={isScrolled ? 'bg-white' : 'bg-blue-900 text-white'}
-                    >
-                        <MobileNavigation
-                            navigationItems={[...navigationItems, ...secondaryNavigationItems]}
-                            isOpen={isMenuOpen}
-                            onClose={() => setIsMenuOpen(false)}
-                            isScrolled={isScrolled}
-                            setIsMenuOpen={setIsMenuOpen}
-                        />
-                    </MobileDrawer>
-                );
-            case 'drawer':
-            default:
-                return (
-                    <MobileDrawer
-                        isOpen={isMenuOpen}
-                        onClose={() => setIsMenuOpen(false)}
-                        position="right"
-                        className={isScrolled ? 'bg-white' : 'bg-blue-900 text-white'}
-                    >
-                        <MobileNavigation
-                            navigationItems={[...navigationItems, ...secondaryNavigationItems]}
-                            isOpen={isMenuOpen}
-                            onClose={() => setIsMenuOpen(false)}
-                            isScrolled={isScrolled}
-                            setIsMenuOpen={setIsMenuOpen}
-                        />
-                    </MobileDrawer>
-                );
-        }
+    // Toggle dropdown
+    const toggleDropdown = () => {
+        setDropdownOpen(!dropdownOpen);
     };
 
     return (
@@ -244,22 +169,159 @@ const ResponsiveHeader = () => {
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <DesktopNavigation
-                            primaryItems={navigationItems}
-                            secondaryItems={secondaryNavigationItems}
-                            isScrolled={isScrolled}
-                            megaMenus={megaMenuConfig}
-                            layout="standard"
-                            bookmarks={{ count: bookmarkCount }}
-                            showSecondary={!isMobile}
-                        />
+                        <div className="hidden md:flex items-center space-x-4">
+                            {/* Primary Nav Links */}
+                            <Link
+                                href="/"
+                                className={`px-3 py-2 rounded-md transition-colors ${router.pathname === '/'
+                                        ? isScrolled
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'bg-white/20 text-white font-medium'
+                                        : isScrolled
+                                            ? 'text-gray-700 hover:bg-gray-100'
+                                            : 'text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                Home
+                            </Link>
+
+                            {/* Blog dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={toggleDropdown}
+                                    className={`flex items-center px-3 py-2 rounded-md transition-colors ${router.pathname.startsWith('/blog') || router.pathname.startsWith('/posts')
+                                            ? isScrolled
+                                                ? 'bg-blue-100 text-blue-700 font-medium'
+                                                : 'bg-white/20 text-white font-medium'
+                                            : isScrolled
+                                                ? 'text-gray-700 hover:bg-gray-100'
+                                                : 'text-white hover:bg-white/10'
+                                        }`}
+                                >
+                                    Blog
+                                    <svg
+                                        className={`ml-1 w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                {dropdownOpen && (
+                                    <div className={`absolute mt-2 w-64 rounded-md shadow-lg z-50 ${isScrolled
+                                            ? 'bg-white border border-gray-200'
+                                            : 'bg-blue-800 border border-blue-700'
+                                        }`}>
+                                        <div className="py-1">
+                                            <div className="px-4 py-2 border-b border-gray-200 border-opacity-20">
+                                                <span className={`text-sm font-medium ${isScrolled ? 'text-gray-700' : 'text-white'
+                                                    }`}>
+                                                    Recente Artikelen
+                                                </span>
+                                            </div>
+
+                                            {recentPosts.map(post => (
+                                                <Link
+                                                    key={post.id}
+                                                    href={`/posts/${post.slug}`}
+                                                    className={`block px-4 py-2 text-sm ${isScrolled
+                                                            ? 'text-gray-700 hover:bg-gray-100'
+                                                            : 'text-white hover:bg-blue-700'
+                                                        }`}
+                                                >
+                                                    {post.title}
+                                                </Link>
+                                            ))}
+
+                                            <div className="border-t border-gray-200 border-opacity-20 py-1 px-4">
+                                                <Link
+                                                    href="/blog"
+                                                    className={`block py-2 text-sm font-medium ${isScrolled
+                                                            ? 'text-blue-600 hover:text-blue-800'
+                                                            : 'text-blue-300 hover:text-white'
+                                                        }`}
+                                                >
+                                                    Alle artikelen →
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <Link
+                                href="/over-mij"
+                                className={`px-3 py-2 rounded-md transition-colors ${router.pathname === '/over-mij'
+                                        ? isScrolled
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'bg-white/20 text-white font-medium'
+                                        : isScrolled
+                                            ? 'text-gray-700 hover:bg-gray-100'
+                                            : 'text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                Over Mij
+                            </Link>
+
+                            <Link
+                                href="/contact"
+                                className={`px-3 py-2 rounded-md transition-colors ${router.pathname === '/contact'
+                                        ? isScrolled
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'bg-white/20 text-white font-medium'
+                                        : isScrolled
+                                            ? 'text-gray-700 hover:bg-gray-100'
+                                            : 'text-white hover:bg-white/10'
+                                    }`}
+                            >
+                                Contact
+                            </Link>
+
+                            {/* Bookmarks Button */}
+                            <Link
+                                href="/bookmarks"
+                                className={`relative px-3 py-2 rounded-md transition-all duration-200 inline-flex items-center ${isScrolled
+                                    ? 'text-gray-700 hover:bg-gray-100'
+                                    : 'text-white hover:bg-white/10'
+                                    }`}
+                                aria-label="Mijn favorieten"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                                    />
+                                </svg>
+
+                                <span className="hidden lg:inline">Favorieten</span>
+
+                                {bookmarkCount > 0 && (
+                                    <span className={`ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full ${isScrolled
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-white/20 text-white'
+                                        }`}>
+                                        {bookmarkCount > 99 ? '99+' : bookmarkCount}
+                                    </span>
+                                )}
+                            </Link>
+                        </div>
 
                         {/* Mobile Search and Menu Buttons */}
                         <div className="flex items-center md:hidden space-x-1">
                             <button
                                 className={`p-2 rounded-md transition-colors ${isScrolled
-                                        ? 'text-gray-700 hover:bg-gray-100'
-                                        : 'text-white hover:bg-white/10'
+                                    ? 'text-gray-700 hover:bg-gray-100'
+                                    : 'text-white hover:bg-white/10'
                                     }`}
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                                 aria-label="Zoeken"
@@ -271,8 +333,8 @@ const ResponsiveHeader = () => {
 
                             <button
                                 className={`p-2 rounded-md transition-colors ${isScrolled
-                                        ? 'text-gray-700 hover:bg-gray-100'
-                                        : 'text-white hover:bg-white/10'
+                                    ? 'text-gray-700 hover:bg-gray-100'
+                                    : 'text-white hover:bg-white/10'
                                     }`}
                                 onClick={toggleMenu}
                                 aria-label={isMenuOpen ? "Sluit menu" : "Open menu"}
@@ -319,7 +381,15 @@ const ResponsiveHeader = () => {
             </header>
 
             {/* Mobile Menu Components */}
-            {renderMobileMenu()}
+            {isMenuOpen && (
+                <MobileNavigation
+                    navigationItems={[...navigationItems, ...secondaryNavigationItems]}
+                    isOpen={isMenuOpen}
+                    onClose={() => setIsMenuOpen(false)}
+                    isScrolled={isScrolled}
+                    setIsMenuOpen={setIsMenuOpen}
+                />
+            )}
 
             {/* Bottom Navigation Bar for Mobile */}
             <MobileMenuBar

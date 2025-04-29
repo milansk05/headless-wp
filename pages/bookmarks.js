@@ -89,8 +89,6 @@ export default function BookmarksPage() {
                 />
             </Head>
 
-            <Header />
-
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs */}
                 <div className="mb-6">
@@ -238,7 +236,6 @@ export default function BookmarksPage() {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }

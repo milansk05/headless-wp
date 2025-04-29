@@ -229,7 +229,6 @@ export default function Home() {
             {/* Nieuwsbrief Sectie */}
             <Newsletter />
 
-            <Footer />
         </div>
     );
 }

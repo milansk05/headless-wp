@@ -41,7 +41,7 @@ body {
 }
 
 /* Headings universele stijlen */
-h1, 
+h1,
 h2,
 h3,
 h4,
@@ -410,4 +410,63 @@ figcaption {
     .no-print {
         display: none;
     }
+}
+
+/* Fix for header spacing and animations */
+header {
+    top: 0;
+    z-index: 40;
+    transition: all 0.3s ease;
+}
+
+/* Dropdown animation and styling */
+.dropdown-animation-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.dropdown-animation-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms, transform 200ms;
+}
+
+.dropdown-animation-exit {
+    opacity: 1;
+}
+
+.dropdown-animation-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 150ms, transform 150ms;
+}
+
+/* Animation for mobile menu */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Additional utility classes */
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+/* Better spacing for dropdown items */
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
 }

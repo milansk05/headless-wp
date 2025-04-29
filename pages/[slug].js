@@ -43,7 +43,6 @@ export default function Page({ page }) {
                         <p className="text-gray-600 mb-4">De pagina die je zoekt bestaat niet of is verwijderd.</p>
                     </div>
                 </main>
-                <Footer />
             </div>
         );
     }
@@ -87,7 +86,6 @@ export default function Page({ page }) {
                 </article>
             </main>
 
-            <Footer />
         </div>
     );
 }

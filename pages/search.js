@@ -155,7 +155,6 @@ export default function Search() {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }

@@ -51,7 +51,6 @@ export default function Category({ category, posts }) {
                         </Link>
                     </div>
                 </main>
-                <Footer />
             </div>
         );
     }
@@ -101,7 +100,6 @@ export default function Category({ category, posts }) {
                 )}
             </main>
 
-            <Footer />
         </div>
     );
 }
