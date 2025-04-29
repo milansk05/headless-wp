@@ -11,16 +11,14 @@ import Link from 'next/link';
  * @param {string} props.alt - Alt tekst voor de afbeelding
  * @param {number|string} props.width - Breedte van de afbeelding (in px of auto)
  * @param {number|string} props.height - Hoogte van de afbeelding (in px of auto)
- * @param {string} props.layout - Layout mode: 'fill', 'fixed', 'intrinsic', 'responsive'
- * @param {string} props.objectFit - CSS object-fit: 'cover', 'contain', 'fill', etc.
+ * @param {string} props.fill - Of Image component moet parent container vullen
  * @param {string} props.className - CSS classes
  * @param {string} props.linkTo - Optionele URL om de afbeelding klikbaar te maken
  * @param {string} props.linkTarget - Target voor de link (_blank, _self, etc.)
  * @param {boolean} props.priority - Prioriteit voor LCP afbeeldingen
  * @param {Object} props.placeholderStyle - Stijl voor de placeholder
  * @param {string} props.fallbackSrc - Fallback afbeelding als de hoofdafbeelding faalt
- * @param {Object} props.sizes - Responsive sizes attribuut
- * @param {boolean} props.lazyBoundary - Aanpasbare lazy boundary marge
+ * @param {string} props.sizes - Responsive sizes attribuut
  * @param {number} props.quality - Afbeeldingskwaliteit (1-100)
  * @param {function} props.onLoad - Event handler wanneer de afbeelding geladen is
  * @param {function} props.onError - Event handler wanneer het laden mislukt
@@ -30,8 +28,7 @@ const OptiImage = ({
     alt = '',
     width,
     height,
-    layout = 'responsive',
-    objectFit = 'cover',
+    fill = false,
     className = '',
     linkTo = null,
     linkTarget = '_self',
@@ -39,7 +36,6 @@ const OptiImage = ({
     placeholderStyle = {},
     fallbackSrc = '/images/placeholder.jpg',
     sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
-    lazyBoundary = '200px',
     quality = 85,
     onLoad = () => { },
     onError = () => { },
@@ -131,57 +127,44 @@ const OptiImage = ({
         />
     );
 
-    // Bepaal vaste waardes voor image props op basis van layout type
-    // "fill" mag geen width/height hebben, andere layouts hebben beide nodig
-    const shouldUseFill = layout === 'fill';
-
-    // Voorbereid de props afhankelijk van de layout
-    const imageProps = shouldUseFill
-        ? {
-            src: effectiveSrc,
-            alt: alt,
-            layout: 'fill',
-            objectFit,
-            sizes,
-            quality,
-            priority,
-            loading: priority ? 'eager' : 'lazy',
-            lazyBoundary,
-            onLoad: handleImageLoad,
-            onError: handleImageError,
-            className: `${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`
-        }
-        : {
-            src: effectiveSrc,
-            alt: alt,
-            width: width !== 'auto' ? parseInt(width) : 800,
-            height: height !== 'auto' ? parseInt(height) : 600,
-            layout: width === 'auto' || height === 'auto' ? 'responsive' : layout,
-            objectFit,
-            sizes,
-            quality,
-            priority,
-            loading: priority ? 'eager' : 'lazy',
-            lazyBoundary,
-            onLoad: handleImageLoad,
-            onError: handleImageError,
-            className: `${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`
-        };
-
-    // Verwijder elke style prop of className die in het imageProps object is opgenomen uit 'rest'
-    const { style: _style, className: _className, ...otherRest } = rest;
-
-    // Combineer images styles
+    // Combineer image styles
     const combinedStyle = {
-        ...style,
-        objectFit,
-        ...(shouldUseFill ? { position: 'absolute', width: '100%', height: '100%' } : {})
+        objectFit: rest.objectFit || 'cover',
+        ...style
     };
+
+    // Voorbereid de props voor de moderne Image component API
+    const imageProps = {
+        src: effectiveSrc,
+        alt: alt,
+        quality,
+        priority,
+        sizes,
+        onLoad: handleImageLoad,
+        onError: handleImageError,
+        className: `${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500 ${className}`,
+        style: combinedStyle,
+    };
+
+    // Als fill is true, gebruik fill mode
+    if (fill) {
+        imageProps.fill = true;
+    } else {
+        // Anders, gebruik width en height
+        imageProps.width = width !== 'auto' ? parseInt(width) : 800;
+        imageProps.height = height !== 'auto' ? parseInt(height) : 600;
+    }
+
+    // Verwijder oude props en dubbele properties uit rest
+    const {
+        objectFit, objectPosition, layout, lazyBoundary,
+        style: _style, className: _className, ...otherRest
+    } = rest;
 
     // Bepaal de uiteindelijke afbeeldingscomponent
     const imageComponent = (
         <div
-            className={`relative transition-opacity duration-500 ${className} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`relative transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
             style={{
                 width: width !== 'auto' ? width : '100%',
                 height: height !== 'auto' ? height : '100%',
@@ -191,7 +174,6 @@ const OptiImage = ({
 
             <Image
                 {...imageProps}
-                style={combinedStyle}
                 {...otherRest}
             />
 
@@ -209,10 +191,8 @@ const OptiImage = ({
     // Als een link is opgegeven, maak de afbeelding klikbaar
     if (linkTo) {
         return (
-            <Link href={linkTo}>
-                <a className="block">
-                    {imageComponent}
-                </a>
+            <Link href={linkTo} target={linkTarget} className="block">
+                {imageComponent}
             </Link>
         );
     }

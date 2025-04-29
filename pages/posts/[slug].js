@@ -142,15 +142,13 @@ export default function Post({ post, relatedPosts = [] }) {
 
                 {/* Preload LCP image */}
                 {post.featuredImage?.node && (
-                    <>
-                        <link
-                            rel="preload"
-                            as="image"
-                            href={post.featuredImage.node.sourceUrl}
-                            imagesrcset={`${post.featuredImage.node.sourceUrl}?w=640 640w, ${post.featuredImage.node.sourceUrl}?w=750 750w, ${post.featuredImage.node.sourceUrl}?w=1080 1080w`}
-                            imagesizes="(max-width: 640px) 100vw, (max-width: 1024px) 640px, 1080px"
-                        />
-                    </>
+                    <link
+                        rel="preload"
+                        as="image"
+                        href={post.featuredImage.node.sourceUrl}
+                        imageSrcSet={`${post.featuredImage.node.sourceUrl}?w=640 640w, ${post.featuredImage.node.sourceUrl}?w=750 750w, ${post.featuredImage.node.sourceUrl}?w=1080 1080w`}
+                        imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 640px, 1080px"
+                    />
                 )}
             </Head>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import OptiImage from './OptiImage';
+import Image from 'next/image';
 import PlaceholderImage from './PlaceholderImage';
 import { validateImageSrc, isLCPCandidate, generateSizes } from '../utils/imageUtils';
 
@@ -79,9 +79,6 @@ const FeaturedImage = ({
         isFullWidth: isHero
     });
 
-    // Stel de link URL in als de afbeelding moet linken naar het bericht
-    const linkUrl = linkToPost && postSlug ? `/posts/${postSlug}` : null;
-
     // De container moet relative positioning hebben voor de fill layout
     const containerStyle = {
         position: 'relative',
@@ -96,32 +93,28 @@ const FeaturedImage = ({
         containerStyle.paddingTop = `${(1 / aspectRatio) * 100}%`;
     }
 
-    // We zorgen dat we geen resterende height/width props doorgeven aan OptiImage
-    // omdat we layout="fill" gebruiken
-    const { height, width, style, ...restProps } = props;
+    // Image style property
+    const imageStyle = {
+        objectFit: props.objectFit || "cover",
+        transition: 'transform 0.5s ease-out',
+        transform: imageLoaded ? 'scale(1)' : 'scale(1.05)'
+    };
 
     return (
         <div
             className={`featured-image ${className}`}
             style={containerStyle}
         >
-            <OptiImage
+            <Image
                 src={validatedSrc}
                 alt={effectiveAlt}
-                layout="fill"
-                objectFit={props.objectFit || "cover"}
+                fill={true}
                 priority={isLCP}
                 quality={props.quality || 85}
                 sizes={imageSizes}
-                linkTo={linkUrl}
-                onLoad={() => setImageLoaded(true)}
                 className="w-full h-full"
-                style={{
-                    opacity: 1, // Expliciete opacity zorgt ervoor dat er geen CSS overschrijvingen zijn
-                    transition: 'transform 0.5s ease-out',
-                    transform: imageLoaded ? 'scale(1)' : 'scale(1.05)'
-                }}
-                {...restProps}
+                style={imageStyle}
+                onLoad={() => setImageLoaded(true)}
             />
 
             {/* Toon caption als die beschikbaar is */}
