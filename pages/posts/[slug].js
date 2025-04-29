@@ -14,9 +14,10 @@ import TableOfContents from '../../components/TableOfContents';
 import FloatingTOC from '../../components/FloatingTOC';
 import ReadingProgress from '../../components/ReadingProgress';
 import CommentsSection from '../../components/CommentsSection';
-import dynamic from 'next/dynamic';
+import BookmarkWidget from '../../components/BookmarkWidget';
 import Breadcrumbs from '../../components/Breadcrumbs';
 import FeaturedImage from '../../components/FeaturedImage';
+import dynamic from 'next/dynamic';
 
 // Dynamisch importeren van ShareButtons voor client-side rendering
 const DynamicShareButtons = dynamic(() => import('../../components/ShareButtons'), { ssr: false });
@@ -221,6 +222,12 @@ export default function Post({ post, relatedPosts = [] }) {
                         </div>
                     )}
 
+                    {/* BookmarkWidget - added below featured image */}
+                    <BookmarkWidget
+                        post={post}
+                        className="mb-8"
+                    />
+
                     {/* Social share buttons - boven de content */}
                     <DynamicShareButtons
                         url={postUrl}
@@ -310,6 +317,7 @@ export default function Post({ post, relatedPosts = [] }) {
                                     post={relatedPost}
                                     showExcerpt={false}
                                     priority={index === 0} // Alleen eerste geladen post prioriteit geven
+                                    showBookmarkButton={true}
                                 />
                             ))}
                         </div>

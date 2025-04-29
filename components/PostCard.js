@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import FeaturedImage from './FeaturedImage';
+import BookmarkButton from './BookmarkButton';
 
 /**
  * OptimizedPostCard - Verbeterde versie van PostCard component met geoptimaliseerde afbeeldingen
+ * en bookmark-functionaliteit
  * 
  * @param {Object} props
  * @param {Object} props.post - WordPress post object
@@ -12,9 +14,10 @@ import FeaturedImage from './FeaturedImage';
  * @param {boolean} props.showExcerpt - Toon post excerpt
  * @param {boolean} props.showCategories - Toon post categorieën
  * @param {boolean} props.showReadMore - Toon 'Lees verder' knop
+ * @param {boolean} props.showBookmarkButton - Toon bookmark knop
  * @param {number} props.excerptLength - Maximale lengte van het excerpt
  */
-const OptimizedPostCard = ({
+const PostCard = ({
     post,
     priority = false,
     className = '',
@@ -22,6 +25,7 @@ const OptimizedPostCard = ({
     showExcerpt = true,
     showCategories = true,
     showReadMore = true,
+    showBookmarkButton = true,
     excerptLength = 120
 }) => {
     // Formatteer de datum
@@ -36,6 +40,7 @@ const OptimizedPostCard = ({
 
     // Beperk de lengte van het uittreksel om te lange voorvertoningen te voorkomen
     const truncateExcerpt = (excerpt, maxLength = excerptLength) => {
+        if (!excerpt) return '';
         // Verwijder HTML-tags
         const plainText = excerpt.replace(/<[^>]+>/g, '');
 
@@ -48,9 +53,11 @@ const OptimizedPostCard = ({
         return truncated.substr(0, lastSpace) + '...';
     };
 
+    if (!post) return null;
+
     return (
         <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${className}`}>
-            <Link href={`/posts/${post.slug}`}>
+            <Link href={`/posts/${post.slug}`} className="block relative">
                 <div className="relative" style={{ height: `${imageHeight}px` }}>
                     {post.featuredImage?.node ? (
                         <FeaturedImage
@@ -63,6 +70,18 @@ const OptimizedPostCard = ({
                     ) : (
                         <div className="bg-gray-200 w-full h-full flex items-center justify-center">
                             <span className="text-gray-500">Geen afbeelding</span>
+                        </div>
+                    )}
+
+                    {/* Bookmark button overlay */}
+                    {showBookmarkButton && (
+                        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                            <BookmarkButton
+                                post={post}
+                                size="md"
+                                className="bg-white bg-opacity-90 hover:bg-white shadow-sm"
+                                showLabel={false}
+                            />
                         </div>
                     )}
                 </div>
@@ -110,17 +129,19 @@ const OptimizedPostCard = ({
                     </div>
                 )}
 
-                {showReadMore && (
-                    <Link
-                        href={`/posts/${post.slug}`}
-                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition"
-                    >
-                        Lees verder
-                    </Link>
-                )}
+                <div className="flex items-center justify-between">
+                    {showReadMore && (
+                        <Link
+                            href={`/posts/${post.slug}`}
+                            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition"
+                        >
+                            Lees verder
+                        </Link>
+                    )}
+                </div>
             </div>
         </div>
     );
 };
 
-export default OptimizedPostCard;
+export default PostCard;
