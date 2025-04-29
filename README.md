@@ -16,6 +16,8 @@ Deze repository bevat een volledig functionele frontend gebouwd met Next.js voor
 - [Routes en Pagina's](#routes-en-paginas)
 - [Componenten](#componenten)
 - [Styling](#styling)
+- [Gebruikersinteractie](#gebruikersinteractie)
+- [API Routes](#api-routes)
 - [Deploy](#deploy)
 - [Veelgestelde vragen](#veelgestelde-vragen)
 - [Probleemoplossing](#probleemoplossing)
@@ -44,6 +46,16 @@ Deze implementatie bevat de volgende functies:
 - ✅ Responsief ontwerp (mobile-friendly)
 - ✅ SEO-geoptimaliseerd
 - ✅ Snelle laadtijden dankzij Next.js optimalisaties
+- ✅ Bookmark/favorieten functionaliteit
+- ✅ Automatisch gegenereerde inhoudsopgave (TOC)
+- ✅ Verbeterde navigatie met breadcrumbs
+- ✅ Social media sharing opties
+- ✅ Leestijd indicatie voor artikelen
+- ✅ Gerelateerde posts suggesties
+- ✅ Scroll-to-top functionaliteit
+- ✅ Leesvoortgangsindicator
+- ✅ Geoptimaliseerde afbeeldingsweergave
+- ✅ Responsive mega menu's
 
 ## Technologieën
 
@@ -52,12 +64,14 @@ Deze implementatie bevat de volgende functies:
   - React 19
   - TailwindCSS 4.1.4
   - GraphQL Request 7.1.2
+  - Framer Motion (voor animaties)
 
 - **Backend**: 
   - WordPress (met WPGraphQL plugin)
   
 - **Overig**:
   - Nodemailer (voor contactformulier)
+  - LocalStorage (voor bookmarks en gebruikersinstellingen)
 
 ## Vereisten
 
@@ -254,6 +268,8 @@ export async function fetchAPI(query, { variables } = {}) {
 - `/[slug]` - Dynamische pagina's uit WordPress
 - `/contact` - Contactpagina met formulier
 - `/search` - Zoekresultaten
+- `/bookmarks` - Favoriete/opgeslagen artikelen
+- `/dashboard` - Persoonlijke voorkeuren en instellingen
 
 ### Dynamische routes
 
@@ -290,12 +306,27 @@ De UI is opgebouwd uit herbruikbare componenten in de `components/` directory:
 
 - `Header.js` - Site navigatie en logo
 - `Footer.js` - Footer met site info, links en contactgegevens
+- `ResponsiveHeader.js` - Adaptieve header voor verschillende schermformaten
+- `DesktopNavigation.js` - Navigatie voor desktop schermen
+- `MobileNavigation.js` - Aangepaste navigatie voor mobiele apparaten
 - `PostCard.js` - Kaart voor blogberichten in lijsten
 - `PostContent.js` - WordPress content renderer met styling
 - `ContactForm.js` - Formulier voor contactpagina
 - `CommentsSection.js` - Sectie voor reacties op berichten
 - `SearchBar.js` - Zoekfunctionaliteit
 - `Newsletter.js` - Nieuwsbrief inschrijfformulier
+- `HeroSection.js` - Hero/banner sectie voor de homepage
+- `BookmarkButton.js` - Knop om artikelen op te slaan als favoriet
+- `BookmarkShowcase.js` - Weergave van opgeslagen favorieten
+- `BookmarkNotification.js` - Meldingen voor bookmark acties
+- `TableOfContents.js` - Automatisch gegenereerde inhoudsopgave
+- `FloatingTOC.js` - Zwevende inhoudsopgave voor lange artikelen
+- `ReadingProgress.js` - Indicator voor leesvoortgang
+- `Breadcrumbs.js` - Navigatiepad om gebruikerslocatie te tonen
+- `MegaMenu.js` - Uitgebreide dropdown menu's
+- `MenuOverlay.js` - Fullscreen menu overlay voor mobiel
+- `ShareButtons.js` - Social media deel-knoppen
+- `FeaturedImage.js` - Geoptimaliseerde afbeeldingsweergave
 
 ## Styling
 
@@ -309,10 +340,49 @@ WordPress content wordt gestijld met de `prose` klassen van `@tailwindcss/typogr
 ```javascript
 // In components/PostContent.js
 <div
-  className="prose prose-lg max-w-none prose-headings:font-semibold ... "
+  className="prose prose-lg max-w-none prose-headings:font-semibold 
+  prose-headings:text-gray-900 
+  prose-headings:tracking-tight
+  prose-h1:text-3xl prose-h1:md:text-4xl
+  prose-h2:text-2xl prose-h2:md:text-3xl
+  prose-h3:text-xl prose-h3:md:text-2xl
+  prose-p:my-5 prose-p:leading-7
+  prose-a:text-blue-600 prose-a:font-medium
+  prose-a:no-underline prose-a:transition-colors
+  hover:prose-a:underline hover:prose-a:text-blue-800"
   dangerouslySetInnerHTML={{ __html: content }}
 />
 ```
+
+Er is speciale aandacht besteed aan responsive design voor een optimale weergave op alle apparaten, met verschillende layoutvariaties voor desktop, tablet en mobiel.
+
+## Gebruikersinteractie
+
+### Favorieten/Bookmarks
+
+Gebruikers kunnen artikelen opslaan als favorieten:
+
+- Bookmarks worden lokaal opgeslagen in de browser (localStorage)
+- Gebruikers ontvangen notificaties bij het opslaan van een artikel
+- Een dedicated `/bookmarks` pagina toont alle opgeslagen artikelen
+- Bookmarks kunnen worden gefilterd en gesorteerd
+
+### Inhoudsopgave
+
+Lange artikelen hebben automatisch gegenereerde inhoudsopgaven:
+
+- Automatisch headings detecteren en ID's toewijzen
+- Anker-links naar specifieke secties
+- Markering van actieve sectie tijdens het scrollen
+- Kopiëren en delen van specifieke secties
+
+### Sociale Integratie
+
+Voor het delen van content:
+
+- Social media share buttons (Twitter, Facebook, LinkedIn)
+- Copy-to-clipboard functionaliteit
+- WhatsApp delen op mobiele apparaten
 
 ## API Routes
 
@@ -404,6 +474,31 @@ Ja, maar je moet de SMTP-instellingen configureren in je `.env.local` bestand om
 
 Ja, maar alleen voor backend functionaliteit. Plugins die de frontend wijzigen zullen niet werken in deze headless setup.
 
+### Hoe werkt de bookmark functionaliteit?
+
+De bookmark functionaliteit slaat artikelen op in de localStorage van de browser. Gebruikers kunnen artikelen toevoegen en verwijderen via de bookmark knop op artikel cards en detailpagina's. De opgeslagen artikelen zijn beschikbaar op de `/bookmarks` pagina.
+
+### Hoe past de inhoudsopgave zich aan artikelen aan?
+
+De inhoudsopgave (TOC) scant automatisch de post content op H2 en H3 koppen, voegt ID's toe aan deze elementen, en genereert een navigeerbare lijst. De TOC markeert automatisch de sectie waar de gebruiker zich bevindt tijdens het scrollen.
+
+## Prestatie-optimalisaties
+
+### Afbeeldingsoptimalisatie
+
+Alle afbeeldingen worden geoptimaliseerd met Next.js Image component:
+- Lazy loading
+- Automatische formaat-optimalisatie
+- WebP/AVIF formaten waar ondersteund
+- Responsive sizing
+
+### Code-splitting
+
+De applicatie maakt gebruik van:
+- Dynamische imports voor niet-kritieke componenten
+- Component lazy loading waar mogelijk
+- Geoptimaliseerde bundle-groottes
+
 ## Probleemoplossing
 
 ### API verbindingsproblemen
@@ -430,3 +525,10 @@ Als je problemen hebt met de verbinding naar de WordPress API:
 ### Debug pagina
 
 Er is een speciale debugpagina beschikbaar op `/config` om de API-verbinding te testen.
+
+### Problemen met bookmarks
+
+Als bookmarks niet correct worden opgeslagen:
+1. Controleer of localStorage beschikbaar is in je browser
+2. Zorg dat cookies/lokale opslag is ingeschakeld
+3. Probeer de browser cache te wissen

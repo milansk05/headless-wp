@@ -49,12 +49,12 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Gebruik Tailwind Dark Mode ondersteuning
 
 ## Fase 3: Geavanceerde Functionaliteiten
-10. ⏱️ **Verbeterde mobiele menu/navigatie** - Optimaliseer de mobile-first ervaring.
+10. ✅ (kan verbeteringen gebruiken) **Verbeterde mobiele menu/navigatie** - Optimaliseer de mobile-first ervaring.
     - Verbeter bestaande responsieve menu
     - Voeg geavanceerde navigatiemogelijkheden toe
     - Optimaliseer voor verschillende schermgroottes
 
-11. **Gerelateerde posts widget** - Verbeter de gerelateerde posts-sectie.
+11. ❓ **Gerelateerde posts widget** - Verbeter de gerelateerde posts-sectie.
     - Ontwikkel een beter algoritme voor gerelateerde content
     - Gebruik tags en content-analyse
     - Verhoog relevantie van aanbevelingen
@@ -64,13 +64,13 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
     - Update backend/database structuur
     - Implementeer reactie sortering op populariteit
 
-13. **Geavanceerd contactformulier** - Breid het contactformulier uit.
+13. ⏱️ **Geavanceerd contactformulier** - Breid het contactformulier uit.
     - Voeg meer velden toe
     - Implementeer conditionele logica
     - Verbeter validatie en foutafhandeling
 
 ## Fase 4: Complexe Systeemuitbreidingen
-14. **Auteur pagina's** - Voeg gedetailleerde auteursprofielen en overzichtspagina's toe.
+14. ❓ **Auteur pagina's** - Voeg gedetailleerde auteursprofielen en overzichtspagina's toe.
     - Ontwikkel auteur templates
     - Implementeer dynamische routering voor auteurspagina's
     - Integreer met WordPress auteur data via GraphQL
