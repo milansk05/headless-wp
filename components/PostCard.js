@@ -51,16 +51,20 @@ const OptimizedPostCard = ({
     return (
         <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${className}`}>
             <Link href={`/posts/${post.slug}`}>
-                <div className="relative h-48 overflow-hidden">
-                    <FeaturedImage
-                        featuredImage={post.featuredImage}
-                        postTitle={post.title}
-                        height={imageHeight}
-                        containerClass="col-12"
-                        linkToPost={false}
-                        priority={priority}
-                        className="w-full h-full transition-transform duration-500 hover:scale-105"
-                    />
+                <div className="relative" style={{ height: `${imageHeight}px` }}>
+                    {post.featuredImage?.node ? (
+                        <FeaturedImage
+                            featuredImage={post.featuredImage}
+                            postTitle={post.title}
+                            priority={priority}
+                            className="w-full h-full"
+                            objectFit="cover"
+                        />
+                    ) : (
+                        <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+                            <span className="text-gray-500">Geen afbeelding</span>
+                        </div>
+                    )}
                 </div>
             </Link>
 
@@ -69,8 +73,8 @@ const OptimizedPostCard = ({
                     <div className="flex flex-wrap gap-2 mb-2">
                         {post.categories.nodes.slice(0, 2).map(category => (
                             <Link
-                                href={`/category/${category.slug}`}
                                 key={category.id}
+                                href={`/category/${category.slug}`}
                                 className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200 transition"
                             >
                                 {category.name}

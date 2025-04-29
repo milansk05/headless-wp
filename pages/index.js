@@ -10,6 +10,7 @@ import SearchBar from '../components/SearchBar';
 import Head from 'next/head';
 import Image from 'next/image';
 import { SiteContext } from './_app';
+import FeaturedImage from '../components/FeaturedImage';
 
 export default function Home() {
     const { siteSettings } = useContext(SiteContext);
@@ -110,13 +111,15 @@ export default function Home() {
                                 <div className="md:flex">
                                     <div className="md:w-1/2">
                                         {featuredPost.featuredImage?.node ? (
-                                            <Image
-                                                src={featuredPost.featuredImage.node.sourceUrl}
-                                                alt={featuredPost.featuredImage.node.altText || featuredPost.title}
-                                                className="w-full h-64 md:h-full object-cover"
-                                                width={800}
-                                                height={600}
-                                            />
+                                            <div className="relative w-full h-64 md:h-full">
+                                                <FeaturedImage
+                                                    featuredImage={featuredPost.featuredImage}
+                                                    postTitle={featuredPost.title}
+                                                    className="w-full h-full"
+                                                    objectFit="cover"
+                                                    priority={true}
+                                                />
+                                            </div>
                                         ) : (
                                             <div className="bg-gray-200 w-full h-64 md:h-full flex items-center justify-center">
                                                 <span className="text-gray-500">Geen afbeelding beschikbaar</span>

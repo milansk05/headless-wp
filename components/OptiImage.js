@@ -43,18 +43,17 @@ const OptiImage = ({
     quality = 85,
     onLoad = () => { },
     onError = () => { },
+    style = {},
     ...rest
 }) => {
     const [imgSrc, setImgSrc] = useState(src);
     const [isLoading, setIsLoading] = useState(!priority);
     const [isError, setIsError] = useState(false);
-    const [imgLoaded, setImgLoaded] = useState(false);
 
     // Reset states wanneer src verandert
     useEffect(() => {
         setImgSrc(src);
         setIsError(false);
-        setImgLoaded(false);
         setIsLoading(!priority);
     }, [src, priority]);
 
@@ -77,7 +76,6 @@ const OptiImage = ({
     // Handle image load event
     const handleImageLoad = (e) => {
         setIsLoading(false);
-        setImgLoaded(true);
         onLoad(e);
     };
 
@@ -133,6 +131,53 @@ const OptiImage = ({
         />
     );
 
+    // Bepaal vaste waardes voor image props op basis van layout type
+    // "fill" mag geen width/height hebben, andere layouts hebben beide nodig
+    const shouldUseFill = layout === 'fill';
+
+    // Voorbereid de props afhankelijk van de layout
+    const imageProps = shouldUseFill
+        ? {
+            src: effectiveSrc,
+            alt: alt,
+            layout: 'fill',
+            objectFit,
+            sizes,
+            quality,
+            priority,
+            loading: priority ? 'eager' : 'lazy',
+            lazyBoundary,
+            onLoad: handleImageLoad,
+            onError: handleImageError,
+            className: `${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`
+        }
+        : {
+            src: effectiveSrc,
+            alt: alt,
+            width: width !== 'auto' ? parseInt(width) : 800,
+            height: height !== 'auto' ? parseInt(height) : 600,
+            layout: width === 'auto' || height === 'auto' ? 'responsive' : layout,
+            objectFit,
+            sizes,
+            quality,
+            priority,
+            loading: priority ? 'eager' : 'lazy',
+            lazyBoundary,
+            onLoad: handleImageLoad,
+            onError: handleImageError,
+            className: `${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`
+        };
+
+    // Verwijder elke style prop of className die in het imageProps object is opgenomen uit 'rest'
+    const { style: _style, className: _className, ...otherRest } = rest;
+
+    // Combineer images styles
+    const combinedStyle = {
+        ...style,
+        objectFit,
+        ...(shouldUseFill ? { position: 'absolute', width: '100%', height: '100%' } : {})
+    };
+
     // Bepaal de uiteindelijke afbeeldingscomponent
     const imageComponent = (
         <div
@@ -145,26 +190,9 @@ const OptiImage = ({
             {isLoading && placeholder}
 
             <Image
-                src={effectiveSrc}
-                alt={alt}
-                width={width !== 'auto' ? parseInt(width) : undefined}
-                height={height !== 'auto' ? parseInt(height) : undefined}
-                layout={width === 'auto' || height === 'auto' ? 'responsive' : layout}
-                objectFit={objectFit}
-                quality={quality}
-                sizes={sizes}
-                priority={priority}
-                loading={priority ? 'eager' : 'lazy'}
-                lazyBoundary={lazyBoundary}
-                onLoad={handleImageLoad}
-                onError={handleImageError}
-                className={`${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
-                style={{
-                    objectFit,
-                    // Als we een fill layout hebben, vullen we de container
-                    ...(layout === 'fill' ? { position: 'absolute', width: '100%', height: '100%' } : {})
-                }}
-                {...rest}
+                {...imageProps}
+                style={combinedStyle}
+                {...otherRest}
             />
 
             {/* Laat error icon/message zien als laden mislukt en fallback ook niet werkt */}
@@ -181,7 +209,7 @@ const OptiImage = ({
     // Als een link is opgegeven, maak de afbeelding klikbaar
     if (linkTo) {
         return (
-            <Link href={linkTo} target={linkTarget}>
+            <Link href={linkTo}>
                 <a className="block">
                     {imageComponent}
                 </a>

@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import OptiImage from './OptiImage';
-import ImageGallery from './ImageGallery';
 import { validateImageSrc } from '../utils/imageUtils';
 
 /**

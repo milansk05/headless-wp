@@ -2,37 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    // Domains voor externe afbeeldingen toestaan
-    domains: [
-      // WordPress gerelateerde domeinen
-      'headless-wp.local',
-      'localhost',
-      'secure.gravatar.com',
-      'www.gravatar.com',
-
-      // WordPress.com / Jetpack domeinen
-      'i0.wp.com',
-      'i1.wp.com',
-      'i2.wp.com',
-      'i3.wp.com',
-      'i4.wp.com',
-      's0.wp.com',
-      's1.wp.com',
-      's2.wp.com',
-
-      // WordPress media subdomeinen - voeg je eigen WordPress domein toe
-      'http://headless-wp.local/', // vervang met je eigen domein
-      'http://headless-wp.local/wp-admin/upload.php/', // vervang met je eigen media subdomein
-
-      // Placeholder afbeeldingsdiensten
-      'placehold.it',
-      'via.placeholder.com',
-      'placekitten.com',
-      'picsum.photos',
-      'source.unsplash.com',
-    ],
-
-    // Meer gedetailleerde remote patterns voor betere veiligheid
+    // More detailed remote patterns for better security
     remotePatterns: [
       {
         protocol: 'http',
@@ -52,7 +22,38 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      // Voeg je eigen WordPress site toe
+      // Placeholder image services
+      {
+        protocol: 'https',
+        hostname: 'placehold.it',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placekitten.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      // Add any other domains you need here
       // {
       //   protocol: 'https',
       //   hostname: 'example.com',
@@ -67,11 +68,6 @@ const nextConfig = {
     // Configureer de plaatsvervanger voor afbeeldingen tijdens het laden
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-
-    // Kwaliteitsniveau voor afbeeldingsoptimalisatie (0-100)
-    // Lagere waarde = kleinere bestanden, minder kwaliteit
-    // Hogere waarde = grotere bestanden, betere kwaliteit
-    quality: 80,
 
     // Schakel automatische minimization in (in productie)
     minimumCacheTTL: 60, // Caching in seconden

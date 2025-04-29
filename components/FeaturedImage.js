@@ -13,7 +13,6 @@ import { validateImageSrc, isLCPCandidate, generateSizes } from '../utils/imageU
  * @param {string} props.className - Extra CSS klassen
  * @param {boolean} props.linkToPost - Of de afbeelding moet linken naar het bericht
  * @param {string} props.postSlug - Slug van het bericht voor link URL
- * @param {string} props.imageSize - Grootte van de afbeelding ('thumbnail', 'medium', 'large', 'full')
  * @param {boolean} props.priority - Of de afbeelding prioriteit heeft voor LCP
  * @param {boolean} props.isHero - Of dit een hero afbeelding is
  */
@@ -23,7 +22,6 @@ const FeaturedImage = ({
     className = '',
     linkToPost = false,
     postSlug = '',
-    imageSize = 'large',
     priority = false,
     isHero = false,
     ...props
@@ -84,22 +82,32 @@ const FeaturedImage = ({
     // Stel de link URL in als de afbeelding moet linken naar het bericht
     const linkUrl = linkToPost && postSlug ? `/posts/${postSlug}` : null;
 
+    // De container moet relative positioning hebben voor de fill layout
+    const containerStyle = {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden'
+    };
+
+    // Als er geen specifieke className wordt meegegeven die de hoogte regelt, 
+    // zorg dan dat we een minimale hoogte hebben op basis van de aspectratio
+    if (!className.includes('h-') && !props.style?.height) {
+        containerStyle.paddingTop = `${(1 / aspectRatio) * 100}%`;
+    }
+
+    // We zorgen dat we geen resterende height/width props doorgeven aan OptiImage
+    // omdat we layout="fill" gebruiken
+    const { height, width, style, ...restProps } = props;
+
     return (
         <div
-            className={`featured-image overflow-hidden ${className}`}
-            style={{
-                position: 'relative',
-                width: '100%',
-                height: props.height || undefined,
-                // Als er geen specifieke hoogte is, gebruik aspectratio om de hoogte te berekenen
-                paddingTop: !props.height ? `${(1 / aspectRatio) * 100}%` : undefined
-            }}
+            className={`featured-image ${className}`}
+            style={containerStyle}
         >
             <OptiImage
                 src={validatedSrc}
                 alt={effectiveAlt}
-                width={originalWidth || 1200}
-                height={originalHeight || Math.round(1200 / aspectRatio)}
                 layout="fill"
                 objectFit={props.objectFit || "cover"}
                 priority={isLCP}
@@ -107,8 +115,13 @@ const FeaturedImage = ({
                 sizes={imageSizes}
                 linkTo={linkUrl}
                 onLoad={() => setImageLoaded(true)}
-                className={`transition-all duration-700 ${imageLoaded ? 'scale-100' : 'scale-105'}`}
-                {...props}
+                className="w-full h-full"
+                style={{
+                    opacity: 1, // Expliciete opacity zorgt ervoor dat er geen CSS overschrijvingen zijn
+                    transition: 'transform 0.5s ease-out',
+                    transform: imageLoaded ? 'scale(1)' : 'scale(1.05)'
+                }}
+                {...restProps}
             />
 
             {/* Toon caption als die beschikbaar is */}

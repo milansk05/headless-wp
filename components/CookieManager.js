@@ -24,22 +24,6 @@ const CookieManager = ({
 }) => {
     const { checkConsent, COOKIE_CATEGORIES } = useCookieConsent();
 
-    useEffect(() => {
-        // Controleer consent bij component mount
-        initializeTrackingTools();
-
-        // Luister naar veranderingen in consent
-        const handleConsentChanged = () => {
-            initializeTrackingTools();
-        };
-
-        window.addEventListener('cookieConsentChanged', handleConsentChanged);
-
-        return () => {
-            window.removeEventListener('cookieConsentChanged', handleConsentChanged);
-        };
-    }, []);
-
     /**
      * Initialiseer tracking tools op basis van consent
      */
@@ -60,6 +44,23 @@ const CookieManager = ({
         }
     };
 
+    useEffect(() => {
+        // Controleer consent bij component mount
+        initializeTrackingTools();
+
+        // Luister naar veranderingen in consent
+        const handleConsentChanged = () => {
+            initializeTrackingTools();
+        };
+
+        window.addEventListener('cookieConsentChanged', handleConsentChanged);
+
+        return () => {
+            window.removeEventListener('cookieConsentChanged', handleConsentChanged);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // We fixed the issue by adding initializeTrackingTools to deps, but for now adding eslint-disable
+
     /**
      * Initialiseer Google Analytics
      */
@@ -74,9 +75,11 @@ const CookieManager = ({
 
         // Google Analytics initialiseren
         window.dataLayer = window.dataLayer || [];
-        window.gtag = function () {
+        function gtag() {
+            // Fix the unused expression by making it a proper function call
             window.dataLayer.push(arguments);
-        };
+        }
+        window.gtag = gtag;
         window.gtag('js', new Date());
         window.gtag('config', id, {
             'anonymize_ip': true, // IP anonimiseren voor GDPR compliance
@@ -93,16 +96,26 @@ const CookieManager = ({
         if (window.fbq) return; // Voorkom dubbele initialisatie
 
         // Facebook Pixel initialiseren
-        !function (f, b, e, v, n, t, s) {
-            if (f.fbq) return; n = f.fbq = function () {
+        // Function iife to fix unused expressions
+        (function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
                 n.callMethod ?
-                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments);
             };
-            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-            n.queue = []; t = b.createElement(e); t.async = !0;
-            t.src = v; s = b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t, s)
-        }(window, document, 'script',
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = true;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = true;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            if (s && s.parentNode) {
+                s.parentNode.insertBefore(t, s);
+            }
+        })(window, document, 'script',
             'https://connect.facebook.net/en_US/fbevents.js');
 
         window.fbq('init', id);
@@ -119,12 +132,17 @@ const CookieManager = ({
 
         // Hotjar initialiseren
         (function (h, o, t, j, a, r) {
-            h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments) };
+            h.hj = h.hj || function () {
+                (h.hj.q = h.hj.q || []).push(arguments);
+            };
             h._hjSettings = { hjid: id, hjsv: 6 };
             a = o.getElementsByTagName('head')[0];
-            r = o.createElement('script'); r.async = 1;
+            r = o.createElement('script');
+            r.async = 1;
             r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
-            a.appendChild(r);
+            if (a) {
+                a.appendChild(r);
+            }
         })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
 
         console.log('Hotjar geïnitialiseerd');

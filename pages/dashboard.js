@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -7,14 +6,9 @@ import useCookieConsent from '../hooks/useCookieConsent';
 
 const Dashboard = () => {
     const {
-        checkConsent,
         COOKIE_CATEGORIES,
-        preferences,
-        updatePreferences
+        preferences
     } = useCookieConsent();
-
-    // Controleer of er toestemming is voor bepaalde categorieën
-    const hasMarketingConsent = checkConsent(COOKIE_CATEGORIES.MARKETING);
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -117,7 +111,12 @@ const Dashboard = () => {
                     </ul>
 
                     <button
-                        onClick={() => window.openCookieConsentModal?.()}
+                        onClick={() => {
+                            // Gebruik window.openCookieConsentModal zonder referentie naar updatePreferences
+                            if (window.openCookieConsentModal) {
+                                window.openCookieConsentModal();
+                            }
+                        }}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                     >
                         Cookie instellingen aanpassen

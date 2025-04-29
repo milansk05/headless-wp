@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { SiteContext } from './_app';
-import { openCookieSettings } from '../components/CookieConsent';
 
 const PrivacyPolicy = () => {
     const { siteSettings } = useContext(SiteContext);
@@ -81,7 +80,7 @@ const PrivacyPolicy = () => {
                         <h3>2.1. Analytische gegevens</h3>
                         <p>
                             Daarnaast verzamelen wij automatisch bepaalde gegevens over je bezoek aan onze website, zoals je IP-adres,
-                            browsertype, bezochte pagina's en de tijd en datum van je bezoek. Deze gegevens worden gebruikt voor analytische
+                            browsertype, bezochte pagina&apos;s en de tijd en datum van je bezoek. Deze gegevens worden gebruikt voor analytische
                             doeleinden om onze website te verbeteren en worden niet gebruikt om je persoonlijk te identificeren.
                         </p>
 
@@ -99,11 +98,11 @@ const PrivacyPolicy = () => {
                             </li>
                             <li>
                                 <strong>Functionele cookies:</strong> Deze cookies maken verbeterde functionaliteit en personalisatie mogelijk.
-                                Ze kunnen door ons of door externe aanbieders worden geplaatst wiens diensten we aan onze pagina's hebben toegevoegd.
+                                Ze kunnen door ons of door externe aanbieders worden geplaatst wiens diensten we aan onze pagina&apos;s hebben toegevoegd.
                             </li>
                             <li>
                                 <strong>Analytische cookies:</strong> Deze cookies stellen ons in staat om bezoeken en verkeersbronnen bij te houden,
-                                zodat we de prestaties van onze site kunnen meten en verbeteren. Ze helpen ons te begrijpen welke pagina's het meest
+                                zodat we de prestaties van onze site kunnen meten en verbeteren. Ze helpen ons te begrijpen welke pagina&apos;s het meest
                                 en minst populair zijn en hoe bezoekers zich door de site bewegen.
                             </li>
                             <li>
@@ -114,7 +113,7 @@ const PrivacyPolicy = () => {
 
                         <h3>3.2. Je cookie-instellingen beheren</h3>
                         <p>
-                            Je kunt je cookievoorkeuren op elk moment aanpassen door te klikken op de knop 'Cookie-instellingen aanpassen'
+                            Je kunt je cookievoorkeuren op elk moment aanpassen door te klikken op de knop &apos;Cookie-instellingen aanpassen&apos;
                             bovenaan deze pagina. Daarnaast kun je cookies beheren of verwijderen via de instellingen van je browser.
                         </p>
 

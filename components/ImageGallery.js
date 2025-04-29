@@ -25,8 +25,6 @@ const ImageGallery = ({
     onImageClick = null,
 }) => {
     const [selectedImage, setSelectedImage] = useState(null);
-    const [loading, setLoading] = useState(true);
-
     // Beperk aantal kolommen tot 1-4
     const effectiveColumns = Math.min(Math.max(columns, 1), 4);
 
