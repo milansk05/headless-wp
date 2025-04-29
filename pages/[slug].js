@@ -1,7 +1,6 @@
 import { fetchAPI } from '../lib/api';
 import { GET_PAGE_BY_SLUG, GET_ALL_PAGES } from '../lib/queries';
 import Head from 'next/head';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { useContext, useState, useEffect } from 'react';
@@ -38,7 +37,6 @@ export default function Page({ page }) {
     if (!page) {
         return (
             <div>
-                <Header />
                 <main className="container mx-auto px-4 py-8">
                     <div className="bg-red-50 p-8 rounded-lg text-center">
                         <h1 className="text-2xl font-bold text-red-700 mb-2">Pagina niet gevonden</h1>
@@ -56,8 +54,6 @@ export default function Page({ page }) {
                 <title>{page.title} | {siteSettings.title || 'Mijn Blog'}</title>
                 <meta name="description" content={page.excerpt || siteSettings.description} />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs navigatie */}

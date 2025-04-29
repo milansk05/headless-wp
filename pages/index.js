@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { fetchAPI } from '../lib/api';
 import { GET_ALL_POSTS, GET_CATEGORIES } from '../lib/queries';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Newsletter from '../components/Newsletter';
 import PostCard from '../components/PostCard';
@@ -85,8 +84,6 @@ export default function Home() {
                 <title>{siteSettings.title} - {siteSettings.description}</title>
                 <meta name="description" content={siteSettings.description} />
             </Head>
-
-            <Header />
 
             <main className="flex-grow">
                 {/* Hero Sectie */}

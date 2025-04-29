@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchAPI } from '../lib/api';
 import { GET_ALL_POSTS, GET_CATEGORIES } from '../lib/queries';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';
@@ -137,8 +136,6 @@ export default function Blog({ initialPosts, categories }) {
                 <title>Blog | Alle artikelen</title>
                 <meta name="description" content="Bekijk alle artikelen en filter op categorie of zoekterm." />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs navigatie */}

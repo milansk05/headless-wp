@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { fetchAPI } from '../lib/api';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';
@@ -86,8 +85,6 @@ export default function Search() {
             <Head>
                 <title>{searchQuery ? `Zoekresultaten voor: ${searchQuery}` : 'Zoeken'} | Mijn Blog</title>
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs navigatie */}

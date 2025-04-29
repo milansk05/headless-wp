@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import Head from 'next/head';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ContactForm from '../components/ContactForm';
 import { SiteContext } from './_app';
@@ -14,8 +13,6 @@ export default function Contact() {
                 <title>Contact | {siteSettings.title || 'Mijn Blog'}</title>
                 <meta name="description" content={`Neem contact op met ${siteSettings.title || 'ons'} via het contactformulier.`} />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 <div className="max-w-4xl mx-auto">

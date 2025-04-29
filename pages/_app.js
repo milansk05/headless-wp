@@ -12,6 +12,10 @@ const ScrollToTop = dynamic(() => import('../components/ScrollToTop'), { ssr: fa
 const CookieConsent = dynamic(() => import('../components/CookieConsent'), { ssr: false });
 const CookieManager = dynamic(() => import('../components/CookieManager'), { ssr: false });
 
+// Nieuwe ResponsiveHeader in plaats van de oude Header
+const ResponsiveHeader = dynamic(() => import('../components/ResponsiveHeader'), { ssr: false });
+const Footer = dynamic(() => import('../components/Footer'), { ssr: false });
+
 // Context om site-instellingen te delen tussen componenten
 export const SiteContext = createContext({});
 
@@ -145,7 +149,15 @@ function MyApp({ Component, pageProps }) {
             <FontLoader />
 
             <div className="min-h-screen flex flex-col bg-gray-50">
+                {/* Nieuwe Responsieve Header */}
+                <ResponsiveHeader />
+
+                {/* Page content */}
                 <Component {...pageProps} />
+
+                {/* Footer blijft ongewijzigd */}
+                <Footer />
+
                 <ScrollToTop />
 
                 {/* Cookie Manager - initialiseert de tracking tools op basis van consent */}

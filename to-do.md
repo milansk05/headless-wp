@@ -17,7 +17,7 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Integreer met de bestaande routestructuur
    - Verbeter de navigatie-ervaring
 
-4. ⏱️(probeer op het einde weer) **Verbeterde typografie** - Implementeer meer geavanceerde typografie-opties.
+4. ⏱️ (probeer op het einde weer) **Verbeterde typografie** - Implementeer meer geavanceerde typografie-opties.
    - Uitbreiden van Tailwind CSS configuratie
    - Toevoegen van verschillende lettertypes en tekstgroottes
    - Verbeteren van leesbaarheid en esthetiek
@@ -33,12 +33,12 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Implementeer cookie management
    - Zorg voor GDPR compliance
 
-7. ⏱️ **Bookmark/Favorieten-functie** - Laat gebruikers artikelen markeren als favoriet.
+7. ✅ **Bookmark/Favorieten-functie** - Laat gebruikers artikelen markeren als favoriet.
    - Implementeer opslag via localStorage
    - Ontwikkel een favorieten interface
    - Bijhouden van gebruikersvoorkeuren
 
-8. ⏱️(grotendeels, maar kijk later weer na) **Verbeterde afbeeldingsbehandeling** - Optimaliseer afbeeldingsweergave.
+8. ⏱️ (grotendeels, maar kijk later weer na) **Verbeterde afbeeldingsbehandeling** - Optimaliseer afbeeldingsweergave.
    - Verbeter lazy loading strategieën
    - Implementeer responsive images
    - Optimaliseer afbeeldingsgrootte en kwaliteit
@@ -49,7 +49,7 @@ Deze roadmap ordent de to-do lijst op basis van complexiteit en logische volgord
    - Gebruik Tailwind Dark Mode ondersteuning
 
 ## Fase 3: Geavanceerde Functionaliteiten
-10. **Verbeterde mobiele menu/navigatie** - Optimaliseer de mobile-first ervaring.
+10. ⏱️ **Verbeterde mobiele menu/navigatie** - Optimaliseer de mobile-first ervaring.
     - Verbeter bestaande responsieve menu
     - Voeg geavanceerde navigatiemogelijkheden toe
     - Optimaliseer voor verschillende schermgroottes

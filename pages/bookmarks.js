@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import Header from '../components/Header';
+import Header from '../components/ResponsiveHeader';
 import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 import SearchBar from '../components/SearchBar';

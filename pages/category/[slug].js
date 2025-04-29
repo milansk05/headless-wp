@@ -2,7 +2,6 @@ import { fetchAPI } from '../../lib/api';
 import { GET_CATEGORIES, GET_POSTS_BY_CATEGORY } from '../../lib/queries';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import PostCard from '../../components/PostCard';
 import Breadcrumbs from '../../components/Breadcrumbs';
@@ -40,7 +39,6 @@ export default function Category({ category, posts }) {
     if (!category) {
         return (
             <div>
-                <Header />
                 <main className="container mx-auto px-4 py-8">
                     <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
                         &larr; Terug naar home
@@ -70,8 +68,6 @@ export default function Category({ category, posts }) {
                 <title>{metaTitle}</title>
                 <meta name="description" content={metaDescription} />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs navigatie */}

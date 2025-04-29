@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import ConfigDebug from '../../components/ConfigDebug';
 
@@ -10,8 +9,6 @@ const ConfigPage = () => {
                 <title>API Configuratie | Headless WordPress</title>
                 <meta name="robots" content="noindex, nofollow" />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 <div className="max-w-4xl mx-auto">

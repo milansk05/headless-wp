@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import Head from 'next/head';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { SiteContext } from './_app';
@@ -32,8 +31,6 @@ const PrivacyPolicy = () => {
                     content={`Privacybeleid en cookiebeleid van ${siteSettings.title || 'Mijn Blog'}. Informatie over hoe wij omgaan met je persoonsgegevens.`}
                 />
             </Head>
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs */}

@@ -3,7 +3,6 @@ import { GET_ALL_POSTS, GET_POST_BY_SLUG, GET_RELATED_POSTS } from '../../lib/qu
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useContext } from 'react';
-import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import OptimizedPostCard from '../../components/PostCard';
 import { SiteContext } from '../_app';
@@ -93,7 +92,6 @@ export default function Post({ post, relatedPosts = [] }) {
     if (!post) {
         return (
             <div>
-                <Header />
                 <div className="container mx-auto px-4 py-16">
                     <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
                         &larr; Terug naar overzicht
@@ -160,8 +158,6 @@ export default function Post({ post, relatedPosts = [] }) {
                 color="bg-blue-600"
                 position="top"
             />
-
-            <Header />
 
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Breadcrumbs navigatie */}
