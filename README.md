@@ -384,6 +384,21 @@ Voor het delen van content:
 - Copy-to-clipboard functionaliteit
 - WhatsApp delen op mobiele apparaten
 
+### Hoe werkt de reactie- en waarderingsfunctionaliteit?
+
+De reactiefunctionaliteit stelt bezoekers in staat om:
+- Reacties te plaatsen op artikelen
+- Reacties te waarderen met up/down votes
+- Te reageren op bestaande reacties (nested comments)
+- Reacties te sorteren op nieuwste, oudste of meest gewaardeerd
+
+Deze functionaliteit maakt gebruik van lokale opslag voor stemmen en GraphQL voor het beheren van comments in WordPress. Het systeem is volledig geïntegreerd met de bestaande WordPress commentaarfunctie.
+
+Opties voor beheerders:
+- Reacties en stemmen modereren via het WordPress admin dashboard
+- Stemtellingen bekijken om populaire discussies te identificeren
+- Geneste reacties tot meerdere niveaus diep toestaan
+
 ## API Routes
 
 Next.js API routes in `pages/api/` worden gebruikt voor serverless functies:
@@ -481,54 +496,3 @@ De bookmark functionaliteit slaat artikelen op in de localStorage van de browser
 ### Hoe past de inhoudsopgave zich aan artikelen aan?
 
 De inhoudsopgave (TOC) scant automatisch de post content op H2 en H3 koppen, voegt ID's toe aan deze elementen, en genereert een navigeerbare lijst. De TOC markeert automatisch de sectie waar de gebruiker zich bevindt tijdens het scrollen.
-
-## Prestatie-optimalisaties
-
-### Afbeeldingsoptimalisatie
-
-Alle afbeeldingen worden geoptimaliseerd met Next.js Image component:
-- Lazy loading
-- Automatische formaat-optimalisatie
-- WebP/AVIF formaten waar ondersteund
-- Responsive sizing
-
-### Code-splitting
-
-De applicatie maakt gebruik van:
-- Dynamische imports voor niet-kritieke componenten
-- Component lazy loading waar mogelijk
-- Geoptimaliseerde bundle-groottes
-
-## Probleemoplossing
-
-### API verbindingsproblemen
-
-Als je problemen hebt met de verbinding naar de WordPress API:
-
-1. Controleer of de `NEXT_PUBLIC_WORDPRESS_API_URL` correct is ingesteld
-2. Zorg ervoor dat de WPGraphQL plugin is geactiveerd
-3. Test de API verbinding op `/config` pagina
-4. Controleer CORS-headers op je WordPress server
-
-### Content wordt niet getoond
-
-1. Bekijk de GraphQL-query met console logging
-2. Controleer of de content bestaat in WordPress
-3. Controleer of de data structuur overeenkomt met wat in de componenten wordt verwacht
-
-### Contactformulier werkt niet
-
-1. Controleer of de SMTP-instellingen correct zijn
-2. Test met een SMTP dienst (zoals Gmail, Mailgun, SendGrid)
-3. Controleer de logs voor fouten
-
-### Debug pagina
-
-Er is een speciale debugpagina beschikbaar op `/config` om de API-verbinding te testen.
-
-### Problemen met bookmarks
-
-Als bookmarks niet correct worden opgeslagen:
-1. Controleer of localStorage beschikbaar is in je browser
-2. Zorg dat cookies/lokale opslag is ingeschakeld
-3. Probeer de browser cache te wissen

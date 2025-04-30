@@ -51,7 +51,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                     comment: ''
                 });
 
-                // Oudercomponent informeren dat een reactie is geplaatst
+                // Notify parent component that a comment was submitted
                 if (onCommentSubmitted) {
                     onCommentSubmitted();
                 }
@@ -74,7 +74,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
 
     return (
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h3 className="text-2xl font-semibold mb-6">Laat een reactie achter</h3>
+            <h3 className="text-2xl font-semibold mb-6">Laat een reactie achter op dit artikel</h3>
 
             {status.submitted ? (
                 <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-8 mb-6 text-center">

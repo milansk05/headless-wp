@@ -1,17 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ContactForm = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        phone: '',
         subject: '',
-        message: ''
+        questionType: 'algemeen', // Default waarde
+        message: '',
+        otherQuestionType: '' // Extra veld voor 'Anders' optie
     });
     const [status, setStatus] = useState({
         submitted: false,
         submitting: false,
         info: { error: false, msg: null }
     });
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
+    // Lijst van vraagtypen voor dropdown
+    const questionTypes = [
+        { value: 'algemeen', label: 'Algemene vraag' },
+        { value: 'product', label: 'Product informatie' },
+        { value: 'ondersteuning', label: 'Technische ondersteuning' },
+        { value: 'samenwerking', label: 'Zakelijke samenwerking' },
+        { value: 'anders', label: 'Anders...' }
+    ];
+
+    // Valideer de formuliergegevens
+    const validateForm = () => {
+        const newErrors = {};
+        
+        // Naam validatie
+        if (!formData.name.trim()) {
+            newErrors.name = 'Naam is verplicht';
+        }
+        
+        // Email validatie
+        if (!formData.email.trim()) {
+            newErrors.email = 'E-mailadres is verplicht';
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            newErrors.email = 'Vul een geldig e-mailadres in';
+        }
+        
+        // Telefoon validatie (optioneel, maar moet geldig formaat hebben indien ingevuld)
+        if (formData.phone && !/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/im.test(formData.phone)) {
+            newErrors.phone = 'Vul een geldig telefoonnummer in';
+        }
+        
+        // Onderwerp validatie
+        if (!formData.subject.trim()) {
+            newErrors.subject = 'Onderwerp is verplicht';
+        }
+        
+        // Bericht validatie
+        if (!formData.message.trim()) {
+            newErrors.message = 'Bericht is verplicht';
+        }
+        
+        // Extra validatie voor 'Anders' optie
+        if (formData.questionType === 'anders' && !formData.otherQuestionType.trim()) {
+            newErrors.otherQuestionType = 'Specificeer het type vraag';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleChange = e => {
         const { name, value } = e.target;
@@ -19,20 +73,63 @@ const ContactForm = () => {
             ...prevData,
             [name]: value
         }));
+        
+        // Markeer veld als aangeraakt
+        setTouched(prev => ({
+            ...prev,
+            [name]: true
+        }));
     };
+
+    const handleBlur = e => {
+        const { name } = e.target;
+        setTouched(prev => ({
+            ...prev,
+            [name]: true
+        }));
+    };
+
+    // Valideer onmiddellijk aangeraakte velden
+    useEffect(() => {
+        if (Object.keys(touched).length > 0) {
+            validateForm();
+        }
+    }, [formData, touched]);
 
     const handleSubmit = async e => {
         e.preventDefault();
+        
+        // Valideer alle velden bij verzending
+        const isValid = validateForm();
+        if (!isValid) {
+            // Markeer alle velden als aangeraakt om fouten te tonen
+            const allTouched = Object.keys(formData).reduce((acc, field) => {
+                acc[field] = true;
+                return acc;
+            }, {});
+            setTouched(allTouched);
+            return;
+        }
+        
         setStatus(prevStatus => ({ ...prevStatus, submitting: true }));
 
         try {
+            // Voorbereid formulierdata
+            const submitData = {
+                ...formData,
+                // Als de vraagtype "anders" is, gebruik het aangepaste veld
+                questionTypeDisplay: formData.questionType === 'anders' 
+                    ? formData.otherQuestionType 
+                    : questionTypes.find(q => q.value === formData.questionType)?.label || formData.questionType
+            };
+
             // API endpoint voor het versturen van het formulier
             const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(submitData)
             });
 
             const data = await res.json();
@@ -46,9 +143,14 @@ const ContactForm = () => {
                 setFormData({
                     name: '',
                     email: '',
+                    phone: '',
                     subject: '',
-                    message: ''
+                    questionType: 'algemeen',
+                    message: '',
+                    otherQuestionType: ''
                 });
+                setTouched({});
+                setErrors({});
             } else {
                 setStatus({
                     submitted: false,
@@ -104,9 +206,12 @@ const ContactForm = () => {
                                 type="text"
                                 value={formData.name}
                                 onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onBlur={handleBlur}
+                                className={`w-full px-4 py-2 border ${touched.name && errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                             />
+                            {touched.name && errors.name && (
+                                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                            )}
                         </div>
 
                         <div>
@@ -119,11 +224,74 @@ const ContactForm = () => {
                                 type="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                onBlur={handleBlur}
+                                className={`w-full px-4 py-2 border ${touched.email && errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                             />
+                            {touched.email && errors.email && (
+                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                            )}
                         </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                                Telefoonnummer
+                            </label>
+                            <input
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder="Optioneel"
+                                className={`w-full px-4 py-2 border ${touched.phone && errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                            />
+                            {touched.phone && errors.phone && (
+                                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="questionType" className="block text-sm font-medium text-gray-700 mb-1">
+                                Type vraag <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="questionType"
+                                name="questionType"
+                                value={formData.questionType}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                {questionTypes.map((type) => (
+                                    <option key={type.value} value={type.value}>
+                                        {type.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {formData.questionType === 'anders' && (
+                        <div>
+                            <label htmlFor="otherQuestionType" className="block text-sm font-medium text-gray-700 mb-1">
+                                Specificeer type vraag <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="otherQuestionType"
+                                name="otherQuestionType"
+                                type="text"
+                                value={formData.otherQuestionType}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                className={`w-full px-4 py-2 border ${touched.otherQuestionType && errors.otherQuestionType ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                            />
+                            {touched.otherQuestionType && errors.otherQuestionType && (
+                                <p className="mt-1 text-sm text-red-600">{errors.otherQuestionType}</p>
+                            )}
+                        </div>
+                    )}
 
                     <div>
                         <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,9 +303,12 @@ const ContactForm = () => {
                             type="text"
                             value={formData.subject}
                             onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            onBlur={handleBlur}
+                            className={`w-full px-4 py-2 border ${touched.subject && errors.subject ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                         />
+                        {touched.subject && errors.subject && (
+                            <p className="mt-1 text-sm text-red-600">{errors.subject}</p>
+                        )}
                     </div>
 
                     <div>
@@ -150,9 +321,12 @@ const ContactForm = () => {
                             rows="5"
                             value={formData.message}
                             onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            onBlur={handleBlur}
+                            className={`w-full px-4 py-2 border ${touched.message && errors.message ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                         ></textarea>
+                        {touched.message && errors.message && (
+                            <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                        )}
                     </div>
 
                     <div className="text-sm text-gray-500">

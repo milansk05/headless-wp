@@ -19,6 +19,21 @@ const validateFormData = (data) => {
   if (!data.message || data.message.trim() === '') {
     errors.push('Bericht is verplicht');
   }
+  
+  // Als telefoonnummer is opgegeven, controleer of het geldig is
+  if (data.phone && !/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/im.test(data.phone)) {
+    errors.push('Een geldig telefoonnummer is verplicht');
+  }
+  
+  // Controleer of er een vraagtype is opgegeven
+  if (!data.questionType) {
+    errors.push('Type vraag is verplicht');
+  }
+  
+  // Als vraagtype "anders" is, moet er een specificatie zijn
+  if (data.questionType === 'anders' && (!data.otherQuestionType || data.otherQuestionType.trim() === '')) {
+    errors.push('Specificatie van het vraagtype is verplicht');
+  }
 
   return errors;
 };
@@ -30,10 +45,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, phone, subject, questionType, questionTypeDisplay, message, otherQuestionType } = req.body;
 
     // Valideer de formuliergegevens
-    const validationErrors = validateFormData({ name, email, subject, message });
+    const validationErrors = validateFormData({ 
+      name, 
+      email, 
+      phone, 
+      subject, 
+      questionType, 
+      otherQuestionType, 
+      message 
+    });
+    
     if (validationErrors.length > 0) {
       return res.status(400).json({
         message: 'Validatiefout: ' + validationErrors.join(', ')
@@ -55,20 +79,31 @@ export default async function handler(req, res) {
     // E-mail adres waar de berichten naartoe moeten
     const toEmail = process.env.CONTACT_EMAIL || 'jouw@emailadres.nl';
 
+    // Bepaal het type vraag voor weergave
+    const displayQuestionType = questionTypeDisplay || 
+      (questionType === 'anders' ? otherQuestionType : questionType);
+      
     // E-mail content opbouwen
     const mailOptions = {
       from: `"${name}" <${email}>`, // Afzender wordt gezet op naam/e-mail van de persoon die het contactformulier invult
       to: toEmail, // Je eigen e-mailadres
       replyTo: email, // Antwoorden gaan direct naar de afzender
       subject: `Nieuw contactbericht: ${subject}`,
-      text: `Naam: ${name}\nE-mail: ${email}\nOnderwerp: ${subject}\n\nBericht:\n${message}`,
+      text: `Naam: ${name}
+E-mail: ${email}
+${phone ? `Telefoonnummer: ${phone}` : ''}
+Onderwerp: ${subject}
+Type vraag: ${displayQuestionType}
+
+Bericht:
+${message}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
           <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">Nieuw contactformulier bericht</h2>
           
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <tr>
-              <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 100px;">Naam:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 150px;">Naam:</td>
               <td style="padding: 8px; border-bottom: 1px solid #eee;">${name}</td>
             </tr>
             <tr>
@@ -77,9 +112,21 @@ export default async function handler(req, res) {
                 <a href="mailto:${email}" style="color: #0066cc; text-decoration: none;">${email}</a>
               </td>
             </tr>
+            ${phone ? `
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Telefoonnummer:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                <a href="tel:${phone}" style="color: #0066cc; text-decoration: none;">${phone}</a>
+              </td>
+            </tr>
+            ` : ''}
             <tr>
               <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Onderwerp:</td>
               <td style="padding: 8px; border-bottom: 1px solid #eee;">${subject}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Type vraag:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">${displayQuestionType}</td>
             </tr>
           </table>
           
