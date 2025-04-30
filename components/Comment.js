@@ -13,16 +13,31 @@ const formatDate = (dateString) => {
     });
 };
 
-const Comment = ({ comment, postId }) => {
-    const [voteStatus, setVoteStatus] = useState(() => getUserVote(comment.id));
+const Comment = ({ comment, postId, onVoteChanged }) => {
+    const [voteStatus, setVoteStatus] = useState('none');
     const [voteScore, setVoteScore] = useState(comment.voteScore || 0);
     const [isVoting, setIsVoting] = useState(false);
+
+    // Fetch user's vote status for this comment on component mount
+    useEffect(() => {
+        const fetchVoteStatus = async () => {
+            try {
+                const status = await getUserVote(comment.id);
+                setVoteStatus(status);
+            } catch (error) {
+                console.error('Error fetching vote status:', error);
+            }
+        };
+
+        fetchVoteStatus();
+    }, [comment.id]);
 
     // Update vote status when it changes elsewhere
     useEffect(() => {
         const handleVoteChange = (event) => {
             if (comment.id === event.detail.commentId) {
                 setVoteStatus(event.detail.vote);
+                setVoteScore(event.detail.newScore);
             }
         };
 
@@ -34,12 +49,13 @@ const Comment = ({ comment, postId }) => {
     const handleVote = async (type) => {
         if (isVoting) return;
 
+        // Als de gebruiker opnieuw op dezelfde stem klikt, zet het terug naar neutraal
         const newVoteType = voteStatus === type ? 'none' : type;
         setIsVoting(true);
 
         try {
-            // Call API to register vote
-            const response = await fetch('/api/comments', {
+            // API aanroepen om stem te registreren op de server
+            const response = await fetch('/api/comments/vote', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,20 +67,32 @@ const Comment = ({ comment, postId }) => {
             });
 
             const data = await response.json();
-
+            
             if (data.success) {
-                // Calculate new vote score
-                let scoreDelta = 0;
-                if (newVoteType === 'up') scoreDelta = voteStatus === 'down' ? 2 : 1;
-                else if (newVoteType === 'down') scoreDelta = voteStatus === 'up' ? -2 : -1;
-                else if (newVoteType === 'none') scoreDelta = voteStatus === 'up' ? -1 : 1;
-
-                // Update local state
-                setVoteScore(prevScore => prevScore + scoreDelta);
+                // Update lokaal alleen als de server-operatie succesvol was
+                // Voor een betere UX gebruiken we de voteCount van de server als die beschikbaar is
+                if (data.voteCount !== undefined) {
+                    setVoteScore(data.voteCount);
+                } else {
+                    // Fallback: bereken nieuwe score lokaal
+                    let scoreDelta = 0;
+                    if (newVoteType === 'up') scoreDelta = voteStatus === 'down' ? 2 : 1;
+                    else if (newVoteType === 'down') scoreDelta = voteStatus === 'up' ? -2 : -1;
+                    else if (newVoteType === 'none') scoreDelta = voteStatus === 'up' ? -1 : 1;
+                    
+                    setVoteScore(prevScore => prevScore + scoreDelta);
+                }
+                
+                // Update vote status in UI
                 setVoteStatus(newVoteType);
-
-                // Save vote to localStorage
+                
+                // Cache vote voor sessie-consistentie
                 saveCommentVote(comment.id, newVoteType);
+                
+                // Informeer de parent component dat er een stem is veranderd
+                if (onVoteChanged) {
+                    onVoteChanged(comment.id, newVoteType, data.voteCount);
+                }
             }
         } catch (error) {
             console.error('Error voting:', error);

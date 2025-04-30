@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import LoadingIndicator from './LoadingIndicator';
 import Comment from './Comment';
-import { getCommentVotes, formatCommentsWithVotes, sortComments } from '../utils/commentUtils';
+import { formatCommentsWithVotes, sortComments } from '../utils/commentUtils';
 
 const Comments = ({ postId }) => {
     const [comments, setComments] = useState([]);
@@ -16,25 +16,33 @@ const Comments = ({ postId }) => {
             try {
                 setLoading(true);
                 setError(null);
-                
+
+                console.log('Fetching comments for postId:', postId);
+
                 const response = await fetch(`/api/comments?postId=${postId}`);
-                
+                console.log('API response status:', response.status);
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch comments');
+                    let errorMessage = 'Failed to fetch comments';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        console.error('Could not parse error response:', e);
+                    }
+                    throw new Error(errorMessage);
                 }
-                
+
                 const data = await response.json();
-                
-                // Get user's votes from localStorage
-                const votes = getCommentVotes();
-                
-                // Format comments with vote information
-                const enhancedComments = formatCommentsWithVotes(data.comments || [], votes);
-                
+                console.log('Received comments data:', data);
+
+                // Format comments with vote information from the server
+                const enhancedComments = formatCommentsWithVotes(data.comments || []);
+                console.log('Enhanced comments:', enhancedComments);
+
                 // Sort comments
                 const sortedComments = sortComments(enhancedComments, sortOption);
-                
+
                 setComments(sortedComments);
                 setLoading(false);
             } catch (err) {
@@ -62,6 +70,21 @@ const Comments = ({ postId }) => {
         setRefreshTrigger(prev => prev + 1);
     };
 
+    // Listen for comment vote changes to refresh data
+    useEffect(() => {
+        const handleVoteChange = () => {
+            // Instead of immediately refreshing, wait a short time to avoid too many refreshes
+            const timeoutId = setTimeout(() => {
+                setRefreshTrigger(prev => prev + 1);
+            }, 1000); // Wait 1 second before refreshing
+
+            return () => clearTimeout(timeoutId);
+        };
+
+        window.addEventListener('commentVoteChanged', handleVoteChange);
+        return () => window.removeEventListener('commentVoteChanged', handleVoteChange);
+    }, []);
+
     if (loading) {
         return (
             <div className="text-center py-6">
@@ -74,6 +97,12 @@ const Comments = ({ postId }) => {
         return (
             <div className="bg-red-50 p-4 rounded-md text-red-700 mb-6">
                 <p>{error}</p>
+                <button
+                    onClick={() => setRefreshTrigger(prev => prev + 1)}
+                    className="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-700 py-1 px-3 rounded-md transition"
+                >
+                    Probeer opnieuw
+                </button>
             </div>
         );
     }
@@ -84,7 +113,7 @@ const Comments = ({ postId }) => {
                 <h3 className="text-xl font-semibold">
                     {comments.length} {comments.length === 1 ? 'Reactie' : 'Reacties'}
                 </h3>
-                
+
                 {/* Sorting options */}
                 {comments.length > 1 && (
                     <div className="flex items-center">
@@ -112,9 +141,9 @@ const Comments = ({ postId }) => {
             ) : (
                 <div className="space-y-6">
                     {comments.map((comment) => (
-                        <Comment 
-                            key={comment.id} 
-                            comment={comment} 
+                        <Comment
+                            key={comment.id}
+                            comment={comment}
                             postId={postId}
                         />
                     ))}

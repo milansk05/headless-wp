@@ -1,81 +1,105 @@
+// commentUtils.js
+import { VOTE_COMMENT } from '../lib/api';
+
 /**
- * Utility functions for comment management
+ * Formatteert een lijst van comments met vote informatie
+ * 
+ * @param {Array} comments - De comments om te formatteren
+ * @param {Object} userVotes - Map van comment ID's naar vote status (optional, not used in new version)
+ * @returns {Array} - Geformatteerde comments
  */
+export const formatCommentsWithVotes = (comments = [], userVotes = {}) => {
+  return comments.map(comment => {
+    // Maak een diepere kopie van het comment object
+    const formattedComment = {
+      ...comment,
+      id: comment.commentId || comment.id,
+      authorName: comment.author?.node?.name || 'Anoniem',
+      content: comment.content || '',
+      date: comment.date || new Date().toISOString(),
+      voteScore: comment.voteScore || 0,
 
-// Store votes in localStorage
-export const saveCommentVote = (commentId, vote) => {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    // Get existing votes
-    const votes = getCommentVotes();
-    
-    // Update the vote for this comment
-    votes[commentId] = vote;
-    
-    // Save back to localStorage
-    localStorage.setItem('commentVotes', JSON.stringify(votes));
-    
-    // Dispatch an event so other components can update
-    window.dispatchEvent(new CustomEvent('commentVoteChanged', {
-      detail: { commentId, vote }
-    }));
-  } catch (error) {
-    console.error('Error saving comment vote:', error);
-  }
+      // Votes komen nu van de server, dus we hoeven niet meer naar userVotes te kijken
+      // userVote wordt nu ingesteld op componentniveau na een API call
+    };
+
+    return formattedComment;
+  });
 };
 
-// Get votes from localStorage
-export const getCommentVotes = () => {
-  if (typeof window === 'undefined') return {};
-  
-  try {
-    const votes = localStorage.getItem('commentVotes');
-    return votes ? JSON.parse(votes) : {};
-  } catch (error) {
-    console.error('Error getting comment votes:', error);
-    return {};
-  }
-};
+/**
+ * Sorteert comments op basis van de gekozen sort optie
+ * 
+ * @param {Array} comments - De te sorteren comments
+ * @param {string} sortOption - De sorteer optie ('newest', 'oldest', 'popular')
+ * @returns {Array} - Gesorteerde comments
+ */
+export const sortComments = (comments = [], sortOption = 'newest') => {
+  const commentsCopy = [...comments];
 
-// Get user's vote for a specific comment
-export const getUserVote = (commentId) => {
-  const votes = getCommentVotes();
-  return votes[commentId] || 0; // 0 means no vote
-};
-
-// Format comments with votes
-export const formatCommentsWithVotes = (comments, votes = {}) => {
-  if (!comments || !Array.isArray(comments)) {
-    return [];
-  }
-  
-  // Add vote information to each comment
-  const enhancedComments = comments.map(comment => ({
-    ...comment,
-    userVote: votes[comment.id] || 0,
-    voteScore: comment.voteScore || 0
-  }));
-  
-  return enhancedComments;
-};
-
-// Sort comments based on different criteria
-export const sortComments = (comments, sortBy = 'newest') => {
-  if (!comments || !Array.isArray(comments)) {
-    return [];
-  }
-  
-  const sortedComments = [...comments];
-  
-  switch (sortBy) {
+  switch (sortOption) {
     case 'newest':
-      return sortedComments.sort((a, b) => new Date(b.date) - new Date(a.date));
+      return commentsCopy.sort((a, b) => new Date(b.date) - new Date(a.date));
     case 'oldest':
-      return sortedComments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return commentsCopy.sort((a, b) => new Date(a.date) - new Date(b.date));
     case 'popular':
-      return sortedComments.sort((a, b) => b.voteScore - a.voteScore);
+      return commentsCopy.sort((a, b) => (b.voteScore || 0) - (a.voteScore || 0));
     default:
-      return sortedComments;
+      return commentsCopy;
+  }
+};
+
+/**
+ * Haalt de vote status op voor een specifiek comment
+ * 
+ * @param {string} commentId - ID van het comment
+ * @returns {string} - Vote status ('up', 'down', of 'none')
+ */
+export const getUserVote = async (commentId) => {
+  try {
+    const response = await fetch(`/api/comments/vote-status?commentId=${commentId}`);
+    if (!response.ok) throw new Error('Kon vote status niet ophalen');
+
+    const data = await response.json();
+    return data.voteStatus || 'none';
+  } catch (error) {
+    console.error('Error getting vote status:', error);
+    return 'none';
+  }
+};
+
+/**
+ * Slaat een vote op voor een comment
+ * 
+ * @param {string} commentId - ID van het comment
+ * @param {string} voteType - Type vote ('up', 'down', of 'none')
+ * @returns {Promise} - Promise die resolveert met het resultaat van de API call
+ */
+export const saveCommentVote = async (commentId, voteType) => {
+  try {
+    const response = await fetch('/api/comments/vote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        commentId,
+        voteType
+      }),
+    });
+
+    if (!response.ok) throw new Error('Kon vote niet opslaan');
+
+    const data = await response.json();
+
+    // Dispatch event zodat andere componenten weten dat er een vote is gewijzigd
+    window.dispatchEvent(new CustomEvent('commentVoteChanged', {
+      detail: { commentId, vote: voteType, newScore: data.voteCount }
+    }));
+
+    return data;
+  } catch (error) {
+    console.error('Error saving vote:', error);
+    throw error;
   }
 };
