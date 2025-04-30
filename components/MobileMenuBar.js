@@ -87,10 +87,17 @@ const MobileMenuBar = ({
 
                 {/* Menu button altijd als laatste */}
                 <button
-                    className={`flex flex-col items-center justify-center w-full h-full ${isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-blue-200 hover:text-white'
-                        }`}
-                    onClick={onOpenMenu}
+                    className={`flex flex-col items-center justify-center w-full h-full ${
+                        isScrolled ? 'text-gray-700 hover:text-blue-600' : 'text-blue-200 hover:text-white'
+                    }`}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Bottom menu button clicked");
+                        onOpenMenu();
+                    }}
                     aria-label="Open menu"
+                    type="button"
                 >
                     <div className="w-6 h-6 flex items-center justify-center">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -137,7 +137,8 @@ const ResponsiveHeader = () => {
 
     // Toggle menu open/closed
     const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
+        console.log("Menu toggle clicked, current state:", isMenuOpen);
+        setIsMenuOpen(prevState => !prevState);
     };
 
     // Toggle dropdown
@@ -367,29 +368,27 @@ const ResponsiveHeader = () => {
                             </button>
                         </div>
                     </div>
-
-                    {/* Mobile Search Bar */}
-                    {isSearchOpen && (
-                        <div className="pb-4 md:hidden animate-fade-in">
-                            <SearchBar
-                                className={`w-full ${isScrolled ? 'bg-gray-100' : 'bg-white/10'}`}
-                                onSearch={() => setIsSearchOpen(false)}
-                            />
-                        </div>
-                    )}
                 </div>
+
+                {/* Mobile Search Bar */}
+                {isSearchOpen && (
+                    <div className="pb-4 md:hidden animate-fade-in">
+                        <SearchBar
+                            className={`w-full ${isScrolled ? 'bg-gray-100' : 'bg-white/10'}`}
+                            onSearch={() => setIsSearchOpen(false)}
+                        />
+                    </div>
+                )}
             </header>
 
             {/* Mobile Menu Components */}
-            {isMenuOpen && (
-                <MobileNavigation
-                    navigationItems={[...navigationItems, ...secondaryNavigationItems]}
-                    isOpen={isMenuOpen}
-                    onClose={() => setIsMenuOpen(false)}
-                    isScrolled={isScrolled}
-                    setIsMenuOpen={setIsMenuOpen}
-                />
-            )}
+            <MobileNavigation
+                navigationItems={[...navigationItems, ...secondaryNavigationItems]}
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+                isScrolled={isScrolled}
+                setIsMenuOpen={setIsMenuOpen}
+            />
 
             {/* Bottom Navigation Bar for Mobile */}
             <MobileMenuBar
