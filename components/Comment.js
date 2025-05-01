@@ -35,7 +35,7 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
     // Update vote status when it changes elsewhere
     useEffect(() => {
         const handleVoteChange = (event) => {
-            if (comment.id === event.detail.commentId) {
+            if (event.detail.commentId === comment.id) {
                 setVoteStatus(event.detail.vote);
                 setVoteScore(event.detail.newScore);
             }
@@ -49,12 +49,12 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
     const handleVote = async (type) => {
         if (isVoting) return;
 
-        // Als de gebruiker opnieuw op dezelfde stem klikt, zet het terug naar neutraal
+        // If user clicks the same button again, treat it as removing the vote
         const newVoteType = voteStatus === type ? 'none' : type;
         setIsVoting(true);
 
         try {
-            // API aanroepen om stem te registreren op de server
+            // Call the API to register the vote
             const response = await fetch('/api/comments/vote', {
                 method: 'PUT',
                 headers: {
@@ -67,32 +67,27 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
-                // Update lokaal alleen als de server-operatie succesvol was
-                // Voor een betere UX gebruiken we de voteCount van de server als die beschikbaar is
-                if (data.voteCount !== undefined) {
-                    setVoteScore(data.voteCount);
-                } else {
-                    // Fallback: bereken nieuwe score lokaal
-                    let scoreDelta = 0;
-                    if (newVoteType === 'up') scoreDelta = voteStatus === 'down' ? 2 : 1;
-                    else if (newVoteType === 'down') scoreDelta = voteStatus === 'up' ? -2 : -1;
-                    else if (newVoteType === 'none') scoreDelta = voteStatus === 'up' ? -1 : 1;
-                    
-                    setVoteScore(prevScore => prevScore + scoreDelta);
-                }
-                
-                // Update vote status in UI
-                setVoteStatus(newVoteType);
-                
-                // Cache vote voor sessie-consistentie
-                saveCommentVote(comment.id, newVoteType);
-                
-                // Informeer de parent component dat er een stem is veranderd
+                // Update local state with the vote count from the server
+                setVoteScore(data.voteCount);
+                setVoteStatus(data.voteType);
+
+                // Dispatch event to notify other components about the vote change
+                window.dispatchEvent(new CustomEvent('commentVoteChanged', {
+                    detail: {
+                        commentId: comment.id,
+                        vote: newVoteType,
+                        newScore: data.voteCount
+                    }
+                }));
+
+                // Call the callback if provided
                 if (onVoteChanged) {
                     onVoteChanged(comment.id, newVoteType, data.voteCount);
                 }
+            } else {
+                console.error('Vote failed:', data.message);
             }
         } catch (error) {
             console.error('Error voting:', error);
@@ -101,18 +96,45 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
         }
     };
 
+    // Generate an author avatar or use the first letter of their name
+    const getAuthorAvatar = () => {
+        const firstLetter = comment.authorName ? comment.authorName.charAt(0).toUpperCase() : 'A';
+
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-800 font-bold text-xl">
+                {firstLetter}
+            </div>
+        );
+    };
+
+    // Format the author name with website link if available
+    const getAuthorNameDisplay = () => {
+        if (comment.authorUrl) {
+            return (
+                <a
+                    href={comment.authorUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-gray-900 hover:text-blue-600 transition"
+                >
+                    {comment.authorName}
+                </a>
+            );
+        }
+
+        return <span className="font-medium text-gray-900">{comment.authorName}</span>;
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-start">
                 <div className="mr-4 relative w-12 h-12 rounded-full overflow-hidden bg-blue-100">
-                    <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-800 font-bold text-xl">
-                        {comment.authorName.charAt(0).toUpperCase()}
-                    </div>
+                    {getAuthorAvatar()}
                 </div>
 
                 <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">{comment.authorName}</h4>
+                        <h4>{getAuthorNameDisplay()}</h4>
                         <span className="text-sm text-gray-500">{formatDate(comment.date)}</span>
                     </div>
 
@@ -127,9 +149,9 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
                             <button
                                 onClick={() => handleVote('up')}
                                 disabled={isVoting}
-                                className={`flex items-center justify-center p-1 rounded-full ${voteStatus === 'up'
-                                    ? 'bg-green-100 text-green-600'
-                                    : 'text-gray-400 hover:text-green-600'
+                                className={`flex items-center justify-center p-1 rounded-full transition ${voteStatus === 'up'
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'text-gray-400 hover:text-green-600'
                                     }`}
                                 title="Deze reactie waarderen"
                             >
@@ -139,7 +161,7 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
                             </button>
 
                             <span className={`text-sm font-medium ${voteScore > 0 ? 'text-green-600' :
-                                voteScore < 0 ? 'text-red-600' : 'text-gray-500'
+                                    voteScore < 0 ? 'text-red-600' : 'text-gray-500'
                                 }`}>
                                 {voteScore}
                             </span>
@@ -147,9 +169,9 @@ const Comment = ({ comment, postId, onVoteChanged }) => {
                             <button
                                 onClick={() => handleVote('down')}
                                 disabled={isVoting}
-                                className={`flex items-center justify-center p-1 rounded-full ${voteStatus === 'down'
-                                    ? 'bg-red-100 text-red-600'
-                                    : 'text-gray-400 hover:text-red-600'
+                                className={`flex items-center justify-center p-1 rounded-full transition ${voteStatus === 'down'
+                                        ? 'bg-red-100 text-red-600'
+                                        : 'text-gray-400 hover:text-red-600'
                                     }`}
                                 title="Deze reactie niet waarderen"
                             >

@@ -5,6 +5,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
         name: '',
         email: '',
         comment: '',
+        website: '' // Optional website field
     });
     const [status, setStatus] = useState({
         submitted: false,
@@ -25,7 +26,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
         setStatus(prevStatus => ({ ...prevStatus, submitting: true }));
 
         try {
-            // API-eindpunt voor het plaatsen van een reactie
+            // API endpoint for posting a comment
             const res = await fetch('/api/comments', {
                 method: 'POST',
                 headers: {
@@ -43,12 +44,13 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                 setStatus({
                     submitted: true,
                     submitting: false,
-                    info: { error: false, msg: data.message }
+                    info: { error: false, msg: data.message || 'Je reactie is succesvol ingediend en wacht op goedkeuring.' }
                 });
                 setFormData({
                     name: '',
                     email: '',
-                    comment: ''
+                    comment: '',
+                    website: ''
                 });
 
                 // Notify parent component that a comment was submitted
@@ -81,16 +83,12 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                     <svg className="w-16 h-16 text-green-600 mx-auto mb-4" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <h3 className="text-xl font-semibold mb-3">Reactie geplaatst!</h3>
+                    <h3 className="text-xl font-semibold mb-3">Reactie ingediend!</h3>
                     <p className="mb-4">{status.info.msg}</p>
                     <button
                         type="button"
                         onClick={() => {
                             setStatus({ submitted: false, submitting: false, info: { error: false, msg: null } });
-                            // Roep de onCommentSubmitted callback aan om reacties opnieuw te laden
-                            if (onCommentSubmitted) {
-                                onCommentSubmitted();
-                            }
                         }}
                         className="mt-4 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors"
                     >
@@ -136,6 +134,20 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                         </div>
                     </div>
                     <div>
+                        <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
+                            Website
+                        </label>
+                        <input
+                            type="url"
+                            id="website"
+                            name="website"
+                            value={formData.website}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="https://voorbeeld.nl"
+                        />
+                    </div>
+                    <div>
                         <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
                             Reactie <span className="text-red-500">*</span>
                         </label>
@@ -151,6 +163,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
                     </div>
                     <div className="text-sm text-gray-500">
                         <p>Velden gemarkeerd met een <span className="text-red-500">*</span> zijn verplicht.</p>
+                        <p className="mt-1">Je reactie zal worden beoordeeld voordat deze wordt gepubliceerd.</p>
                     </div>
                     <button
                         type="submit"

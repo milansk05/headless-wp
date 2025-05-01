@@ -1,26 +1,26 @@
 // commentUtils.js
-import { VOTE_COMMENT } from '../lib/api';
 
 /**
- * Formatteert een lijst van comments met vote informatie
+ * Formats a list of comments with vote information
  * 
- * @param {Array} comments - De comments om te formatteren
- * @param {Object} userVotes - Map van comment ID's naar vote status (optional, not used in new version)
- * @returns {Array} - Geformatteerde comments
+ * @param {Array} comments - The comments to format
+ * @returns {Array} - Formatted comments
  */
-export const formatCommentsWithVotes = (comments = [], userVotes = {}) => {
+export const formatCommentsWithVotes = (comments = []) => {
+  if (!comments || !Array.isArray(comments)) {
+    console.warn('Invalid comments array provided to formatCommentsWithVotes');
+    return [];
+  }
+
   return comments.map(comment => {
-    // Maak een diepere kopie van het comment object
+    // Create a deep copy of the comment object
     const formattedComment = {
       ...comment,
       id: comment.commentId || comment.id,
       authorName: comment.author?.node?.name || 'Anoniem',
       content: comment.content || '',
       date: comment.date || new Date().toISOString(),
-      voteScore: comment.voteScore || 0,
-
-      // Votes komen nu van de server, dus we hoeven niet meer naar userVotes te kijken
-      // userVote wordt nu ingesteld op componentniveau na een API call
+      voteScore: comment.voteScore || 0
     };
 
     return formattedComment;
@@ -28,11 +28,11 @@ export const formatCommentsWithVotes = (comments = [], userVotes = {}) => {
 };
 
 /**
- * Sorteert comments op basis van de gekozen sort optie
+ * Sorts comments based on the chosen sort option
  * 
- * @param {Array} comments - De te sorteren comments
- * @param {string} sortOption - De sorteer optie ('newest', 'oldest', 'popular')
- * @returns {Array} - Gesorteerde comments
+ * @param {Array} comments - The comments to sort
+ * @param {string} sortOption - The sort option ('newest', 'oldest', 'popular')
+ * @returns {Array} - Sorted comments
  */
 export const sortComments = (comments = [], sortOption = 'newest') => {
   const commentsCopy = [...comments];
@@ -50,18 +50,21 @@ export const sortComments = (comments = [], sortOption = 'newest') => {
 };
 
 /**
- * Haalt de vote status op voor een specifiek comment
+ * Gets the vote status for a specific comment
  * 
- * @param {string} commentId - ID van het comment
- * @returns {string} - Vote status ('up', 'down', of 'none')
+ * @param {string} commentId - ID of the comment
+ * @returns {Promise<string>} - Promise that resolves with the vote status ('up', 'down', or 'none')
  */
 export const getUserVote = async (commentId) => {
   try {
     const response = await fetch(`/api/comments/vote-status?commentId=${commentId}`);
-    if (!response.ok) throw new Error('Kon vote status niet ophalen');
+    if (!response.ok) {
+      console.error('Failed to get vote status, status code:', response.status);
+      return 'none';
+    }
 
     const data = await response.json();
-    return data.voteStatus || 'none';
+    return data.success ? data.voteStatus : 'none';
   } catch (error) {
     console.error('Error getting vote status:', error);
     return 'none';
@@ -69,16 +72,18 @@ export const getUserVote = async (commentId) => {
 };
 
 /**
- * Slaat een vote op voor een comment
+ * Saves a vote for a comment
+ * This function is kept for backward compatibility, but direct API calls
+ * are now preferred from the Comment component
  * 
- * @param {string} commentId - ID van het comment
- * @param {string} voteType - Type vote ('up', 'down', of 'none')
- * @returns {Promise} - Promise die resolveert met het resultaat van de API call
+ * @param {string} commentId - ID of the comment
+ * @param {string} voteType - Type of vote ('up', 'down', or 'none')
+ * @returns {Promise} - Promise that resolves with the API response
  */
 export const saveCommentVote = async (commentId, voteType) => {
   try {
     const response = await fetch('/api/comments/vote', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -88,14 +93,23 @@ export const saveCommentVote = async (commentId, voteType) => {
       }),
     });
 
-    if (!response.ok) throw new Error('Kon vote niet opslaan');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Could not save vote');
+    }
 
     const data = await response.json();
 
-    // Dispatch event zodat andere componenten weten dat er een vote is gewijzigd
-    window.dispatchEvent(new CustomEvent('commentVoteChanged', {
-      detail: { commentId, vote: voteType, newScore: data.voteCount }
-    }));
+    // Dispatch event so other components know a vote has changed
+    if (data.success && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('commentVoteChanged', {
+        detail: {
+          commentId,
+          vote: voteType,
+          newScore: data.voteCount
+        }
+      }));
+    }
 
     return data;
   } catch (error) {

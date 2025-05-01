@@ -1,53 +1,59 @@
 import { fetchAPI } from '../../lib/api';
 
-// GraphQL mutatie voor het toevoegen van een reactie
+// GraphQL mutation for adding a comment
 const ADD_COMMENT = `
-      mutation AddComment($postId: Int!, $content: String!, $author: String!, $authorEmail: String!) {
-        createComment(
-          input: {
-            commentOn: $postId, 
-            content: $content, 
-            author: $author, 
-            authorEmail: $authorEmail
-          }
-        ) {
-          success
-          comment {
-            id
-            content
-            date
-            author {
-              node {
-                name
-                email
-              }
-            }
+  mutation AddComment($postId: Int!, $content: String!, $author: String!, $authorEmail: String!, $authorUrl: String) {
+    createComment(
+      input: {
+        commentOn: $postId, 
+        content: $content, 
+        author: $author, 
+        authorEmail: $authorEmail,
+        authorUrl: $authorUrl
+      }
+    ) {
+      success
+      comment {
+        id
+        content
+        date
+        author {
+          node {
+            name
+            email
+            url
           }
         }
       }
-    `;
+    }
+  }
+`;
 
-// GraphQL query voor het ophalen van reacties
+// GraphQL query for getting comments
 const GET_COMMENTS = `
-      query GetComments($postId: ID!) {
-        comments(where: { contentId: $postId }) {
-          nodes {
-            id
-            content
-            date
-            author {
-              node {
-                name
-                email
-              }
-            }
-            parentId
+  query GetComments($postId: ID!) {
+    comments(where: { contentId: $postId, status: APPROVE }) {
+      nodes {
+        id
+        content
+        date
+        author {
+          node {
+            name
+            email
+            url
           }
         }
+        parentId
+        databaseId
+        commentId
+        status
       }
-    `;
+    }
+  }
+`;
 
-// Valideer reactiegegevens
+// Validate comment data
 const validateCommentData = (data) => {
     const errors = [];
 
@@ -67,21 +73,28 @@ const validateCommentData = (data) => {
         errors.push('Post ID is vereist');
     }
 
+    // If website is provided, make sure it's a valid URL
+    if (data.website && !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(data.website)) {
+        errors.push('Geef een geldige website URL op');
+    }
+
     return errors;
 };
 
-// Update the formatComments function to simplify it without nested replies
+// Format the comments
 const formatComments = (comments) => {
     if (!comments || !Array.isArray(comments)) {
         console.warn('No valid comments array to format', comments);
         return [];
     }
 
-    // Alleen hoofdcomments selecteren (geen replies)
-    const parentComments = comments.filter(comment => !comment.parentId);
+    // Only include approved comments
+    const approvedComments = comments.filter(comment =>
+        comment.status === 'APPROVE' || comment.status === 'APPROVED'
+    );
 
-    // Formatteer elke comment
-    const formattedComments = parentComments.map(comment => {
+    // Format each comment
+    const formattedComments = approvedComments.map(comment => {
         return {
             id: comment.id,
             commentId: comment.commentId || comment.databaseId,
@@ -89,6 +102,7 @@ const formatComments = (comments) => {
             date: comment.date,
             authorName: comment.author?.node?.name || 'Anoniem',
             authorEmail: comment.author?.node?.email || '',
+            authorUrl: comment.author?.node?.url || '',
             voteScore: comment.voteScore || 0
         };
     });
@@ -97,7 +111,7 @@ const formatComments = (comments) => {
 };
 
 export default async function handler(req, res) {
-    // Behandel GET-verzoek (reacties ophalen)
+    // Handle GET request (get comments)
     if (req.method === 'GET') {
         try {
             const { postId } = req.query;
@@ -106,7 +120,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ message: 'Post ID is required' });
             }
 
-            // Test of basis WordPress API bereikbaar is voordat we comments ophalen
+            // Test if the WordPress API is reachable
             try {
                 await fetchAPI(`
                 query TestConnection {
@@ -116,13 +130,26 @@ export default async function handler(req, res) {
                 }
             `);
             } catch (error) {
-                console.error('WordPress API niet bereikbaar:', error);
+                console.error('WordPress API not reachable:', error);
+
+                // Use mock data if WordPress API is not reachable
+                if (process.env.NODE_ENV === 'development') {
+                    const { getFormattedComments } = await import('../../mocks/commentApi');
+                    const comments = getFormattedComments();
+
+                    return res.status(200).json({
+                        comments: comments,
+                        note: 'Using mock data because WordPress API is not reachable'
+                    });
+                }
+
                 return res.status(500).json({
                     message: 'Er is een probleem met de verbinding naar WordPress.',
                     error: error.message
                 });
             }
 
+            // If WordPress API is reachable, get comments from it
             const data = await fetchAPI(GET_COMMENTS, {
                 variables: { postId },
             });
@@ -141,17 +168,18 @@ export default async function handler(req, res) {
         }
     }
 
-    // Behandel POST-verzoek (reactie plaatsen)
+    // Handle POST request (add comment)
     if (req.method === 'POST') {
         try {
-            const { name, email, comment, postId } = req.body;
+            const { name, email, comment, website, postId } = req.body;
 
-            // Valideer formuliergegevens
+            // Validate form data
             const validationErrors = validateCommentData({
                 name,
                 email,
                 comment,
-                postId
+                postId,
+                website
             });
 
             if (validationErrors.length > 0) {
@@ -160,7 +188,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Zet postId om naar een integer voor de GraphQL API
+            // Convert postId to integer for GraphQL API
             const postIdInt = parseInt(postId, 10);
 
             if (isNaN(postIdInt)) {
@@ -169,13 +197,14 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Stuur reactie naar WordPress
+            // Send comment to WordPress
             const data = await fetchAPI(ADD_COMMENT, {
                 variables: {
                     postId: postIdInt,
                     content: comment,
                     author: name,
-                    authorEmail: email
+                    authorEmail: email,
+                    authorUrl: website || null
                 },
             });
 
@@ -195,10 +224,17 @@ export default async function handler(req, res) {
         } catch (error) {
             console.error('Error submitting comment:', error);
 
-            // Specifieke error bericht voor gebruiker
+            // If WordPress API is not reachable, simulate success in development
+            if (process.env.NODE_ENV === 'development') {
+                return res.status(200).json({
+                    message: 'Je reactie is succesvol geplaatst en wacht op goedkeuring. (Simulatie omdat WordPress API niet bereikbaar is)',
+                });
+            }
+
+            // Specific error message for user
             let errorMessage = 'Er is een fout opgetreden bij het verwerken van je reactie. Probeer het later opnieuw.';
 
-            // Controleer op specifieke GraphQL fouten
+            // Check for specific GraphQL errors
             if (error.response?.errors?.length > 0) {
                 const graphqlErrors = error.response.errors.map(err => err.message).join(', ');
                 console.error('GraphQL errors:', graphqlErrors);
@@ -213,40 +249,6 @@ export default async function handler(req, res) {
             return res.status(500).json({
                 message: errorMessage,
                 error: error.message || 'Unknown error'
-            });
-        }
-    }
-
-    // Behandel PUT-verzoek (stem op reactie)
-    if (req.method === 'PUT') {
-        try {
-            const { commentId, voteType } = req.body;
-
-            if (!commentId) {
-                return res.status(400).json({ message: 'Comment ID is vereist' });
-            }
-
-            if (!['up', 'down', 'none'].includes(voteType)) {
-                return res.status(400).json({ message: 'Ongeldig stemtype' });
-            }
-
-            // Simuleer stemmen in deze demo (normaal zou dit naar WordPress GraphQL gaan)
-            // In een echte implementatie zou je de VOTE_COMMENT mutatie gebruiken
-            // die we eerder hebben gedefinieerd
-
-            return res.status(200).json({
-                success: true,
-                message: 'Stem geregistreerd',
-                commentId: commentId,
-                voteType: voteType,
-                // Op een echte backend zou dit de nieuwe stemtelling zijn
-                voteScore: voteType === 'up' ? 1 : voteType === 'down' ? -1 : 0
-            });
-        } catch (error) {
-            console.error('Error voting on comment:', error);
-            return res.status(500).json({
-                message: 'Er is een fout opgetreden bij het stemmen.',
-                error: error.message
             });
         }
     }

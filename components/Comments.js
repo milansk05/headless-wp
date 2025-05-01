@@ -65,20 +65,30 @@ const Comments = ({ postId }) => {
         setSortOption(e.target.value);
     };
 
-    // Handle comment refreshing
-    const refreshComments = () => {
-        setRefreshTrigger(prev => prev + 1);
+    // Handle vote change event from Comment component
+    const handleVoteChange = (commentId, voteType, newScore) => {
+        setComments(prevComments =>
+            prevComments.map(comment =>
+                comment.id === commentId
+                    ? { ...comment, voteScore: newScore }
+                    : comment
+            )
+        );
     };
 
     // Listen for comment vote changes to refresh data
     useEffect(() => {
-        const handleVoteChange = () => {
-            // Instead of immediately refreshing, wait a short time to avoid too many refreshes
-            const timeoutId = setTimeout(() => {
-                setRefreshTrigger(prev => prev + 1);
-            }, 1000); // Wait 1 second before refreshing
+        const handleVoteChange = (event) => {
+            const { commentId, newScore } = event.detail;
 
-            return () => clearTimeout(timeoutId);
+            // Update the comment score locally without a full refresh
+            setComments(prevComments =>
+                prevComments.map(comment =>
+                    comment.id === commentId
+                        ? { ...comment, voteScore: newScore }
+                        : comment
+                )
+            );
         };
 
         window.addEventListener('commentVoteChanged', handleVoteChange);
@@ -145,6 +155,7 @@ const Comments = ({ postId }) => {
                             key={comment.id}
                             comment={comment}
                             postId={postId}
+                            onVoteChanged={handleVoteChange}
                         />
                     ))}
                 </div>

@@ -1,32 +1,20 @@
-import { GraphQLClient, gql } from 'graphql-request';
 import { parse } from 'cookie';
+import { getVoteStatus } from '../../../mocks/commentApi';
 
-// GraphQL API endpoint
-const graphqlAPI = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
-
-// Query om de vote status van een gebruiker voor een comment op te halen
-const GET_COMMENT_VOTE_STATUS = gql`
-  query GetCommentVoteStatus($commentId: ID!, $deviceId: String!) {
-    commentVoteStatus(commentId: $commentId, deviceId: $deviceId) {
-      status
-      message
-    }
-  }
-`;
-
-/**
- * API route handler voor het ophalen van de vote status van een gebruiker
- */
+// This is the API route for getting the current vote status of a user for a comment
 export default async function handler(req, res) {
-    // Alleen GET verzoeken toestaan
+    // Only allow GET requests
     if (req.method !== 'GET') {
-        return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+        return res.status(405).json({
+            success: false,
+            message: 'Method Not Allowed'
+        });
     }
 
     try {
         const { commentId } = req.query;
 
-        // Check voor vereiste parameter
+        // Check for required parameter
         if (!commentId) {
             return res.status(400).json({
                 success: false,
@@ -34,37 +22,25 @@ export default async function handler(req, res) {
             });
         }
 
-        // Haal device ID op uit cookies
-        let deviceId = null;
+        // Get device ID from cookies
         const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
+        const deviceId = cookies.comment_voter_id;
 
-        if (cookies.deviceId) {
-            deviceId = cookies.deviceId;
-        } else {
-            // Als geen device ID gevonden, dan heeft de gebruiker nog niet gestemd
+        // If no device ID is found, the user hasn't voted yet
+        if (!deviceId) {
             return res.status(200).json({
                 success: true,
                 voteStatus: 'none'
             });
         }
 
-        // GraphQL client voor WordPress
-        const graphQLClient = new GraphQLClient(graphqlAPI, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        // Use the mock function to get the vote status
+        // In a real implementation, this would query your database
+        const voteStatus = getVoteStatus(commentId, deviceId);
 
-        // Voer de GraphQL query uit
-        const result = await graphQLClient.request(GET_COMMENT_VOTE_STATUS, {
-            commentId,
-            deviceId
-        });
-
-        // Return de vote status
         return res.status(200).json({
             success: true,
-            voteStatus: result.commentVoteStatus?.status || 'none'
+            voteStatus: voteStatus
         });
     } catch (error) {
         console.error('Error in vote status API route:', error);
