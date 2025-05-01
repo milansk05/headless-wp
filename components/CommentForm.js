@@ -5,7 +5,7 @@ const CommentForm = ({ postId, onCommentSubmitted }) => {
         name: '',
         email: '',
         comment: '',
-        website: '' // Optional website field
+        website: ''
     });
     const [status, setStatus] = useState({
         submitted: false,

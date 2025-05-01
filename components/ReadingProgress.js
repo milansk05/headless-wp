@@ -26,26 +26,51 @@ const ReadingProgress = ({
         // Functie om de voortgang te berekenen
         const calculateProgress = () => {
             const article = document.querySelector(target);
-
             if (!article) return;
 
-            // Bereken de positie en afmetingen van het artikel
-            const rect = article.getBoundingClientRect();
+            // Find the first H2 within the article
+            const firstH2 = article.querySelector('h2');
+            if (!firstH2) {
+                // If no H2 found, use the article itself
+                calculateProgressFromElement(article, article);
+                return;
+            }
 
-            // Bepaal het begin- en eindpunt van het zichtbare deel van het artikel
+            // Bereken de voortgang vanaf het eerste H2 element
+            calculateProgressFromElement(article, firstH2);
+        };
+
+        // Calculate progress with a specific starting element
+        const calculateProgressFromElement = (article, startElement) => {
+            // Get positions and dimensions
+            const articleRect = article.getBoundingClientRect();
+            const startRect = startElement.getBoundingClientRect();
             const viewportHeight = window.innerHeight;
-            const articleStart = rect.top < 0 ? 0 : rect.top;
             const windowScrollTop = window.scrollY;
 
-            // Totale scrollbare hoogte van het artikel
-            const articleHeight = article.clientHeight;
-
-            // Hoeveel is al gescrolld? 
-            const scrolled = windowScrollTop - rect.top + articleStart + viewportHeight / 2;
-
-            // Bereken de voortgang als percentage
-            const percent = Math.min(100, Math.max(0, (scrolled / articleHeight) * 100));
-
+            // Calculate absolute positions relative to the document
+            const articleTop = windowScrollTop + articleRect.top;
+            const articleBottom = windowScrollTop + articleRect.bottom;
+            const startTop = windowScrollTop + startRect.top;
+            
+            // The total scrollable distance from the start element to the end of the article
+            const totalScrollableDistance = articleBottom - startTop;
+            
+            // How far we've scrolled past the start element
+            const currentViewportMiddle = windowScrollTop + (viewportHeight / 2);
+            
+            // If we haven't reached the start element yet, progress is 0
+            if (currentViewportMiddle < startTop) {
+                setWidth(0);
+                return;
+            }
+            
+            // How much we've scrolled past the start element
+            const scrolledPastStart = currentViewportMiddle - startTop;
+            
+            // Calculate percentage of progress through the content
+            const percent = Math.min(100, Math.max(0, (scrolledPastStart / totalScrollableDistance) * 100));
+            
             setWidth(percent);
         };
 

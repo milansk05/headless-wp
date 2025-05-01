@@ -2,7 +2,7 @@ import { fetchAPI } from '../../lib/api';
 
 // GraphQL mutation for adding a comment
 const ADD_COMMENT = `
-  mutation AddComment($postId: Int!, $content: String!, $author: String!, $authorEmail: String!, $authorUrl: String) {
+  mutation AddComment($postId: ID!, $content: String!, $author: String!, $authorEmail: String!, $authorUrl: String) {
     createComment(
       input: {
         commentOn: $postId, 
@@ -169,89 +169,72 @@ export default async function handler(req, res) {
     }
 
     // Handle POST request (add comment)
-    if (req.method === 'POST') {
-        try {
-            const { name, email, comment, website, postId } = req.body;
-
-            // Validate form data
-            const validationErrors = validateCommentData({
-                name,
-                email,
-                comment,
-                postId,
-                website
-            });
-
-            if (validationErrors.length > 0) {
-                return res.status(400).json({
-                    message: 'Validatiefout: ' + validationErrors.join(', ')
-                });
-            }
-
-            // Convert postId to integer for GraphQL API
-            const postIdInt = parseInt(postId, 10);
-
-            if (isNaN(postIdInt)) {
-                return res.status(400).json({
-                    message: 'Post ID moet een geldig getal zijn'
-                });
-            }
-
-            // Send comment to WordPress
-            const data = await fetchAPI(ADD_COMMENT, {
-                variables: {
-                    postId: postIdInt,
-                    content: comment,
-                    author: name,
-                    authorEmail: email,
-                    authorUrl: website || null
-                },
-            });
-
-            if (data.createComment && data.createComment.success) {
-                return res.status(200).json({
-                    message: 'Je reactie is succesvol geplaatst en wacht op goedkeuring.',
-                    comment: data.createComment.comment
-                });
-            } else {
-                console.error('Comment creation failed but no error was thrown:', data);
-                return res.status(400).json({
-                    message: 'Er is een fout opgetreden bij het plaatsen van je reactie.',
-                    error: 'API returned unsuccessful response'
-                });
-            }
-
-        } catch (error) {
-            console.error('Error submitting comment:', error);
-
-            // If WordPress API is not reachable, simulate success in development
-            if (process.env.NODE_ENV === 'development') {
-                return res.status(200).json({
-                    message: 'Je reactie is succesvol geplaatst en wacht op goedkeuring. (Simulatie omdat WordPress API niet bereikbaar is)',
-                });
-            }
-
-            // Specific error message for user
-            let errorMessage = 'Er is een fout opgetreden bij het verwerken van je reactie. Probeer het later opnieuw.';
-
-            // Check for specific GraphQL errors
-            if (error.response?.errors?.length > 0) {
-                const graphqlErrors = error.response.errors.map(err => err.message).join(', ');
-                console.error('GraphQL errors:', graphqlErrors);
-
-                if (graphqlErrors.includes('commentOn')) {
-                    errorMessage = 'Er is een probleem met het artikel ID. Probeer de pagina te vernieuwen.';
-                } else if (graphqlErrors.includes('not authorized')) {
-                    errorMessage = 'Je hebt geen toestemming om reacties te plaatsen. Mogelijk zijn reacties uitgeschakeld.';
-                }
-            }
-
-            return res.status(500).json({
-                message: errorMessage,
-                error: error.message || 'Unknown error'
-            });
-        }
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    try {
+        const { name, email, comment, website, postId } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !comment || !postId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name, email, comment, and postId are required'
+            });
+        }
+
+        // Ensure postId is properly formatted
+        // WordPress GraphQL might expect a numeric ID
+        const numericPostId = parseInt(postId, 10);
+
+        if (isNaN(numericPostId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid post ID format'
+            });
+        }
+
+        // Call the WordPress GraphQL API to create the comment
+        const data = await fetchAPI(ADD_COMMENT, {
+            variables: {
+                postId: numericPostId,
+                content: comment,
+                author: name,
+                authorEmail: email,
+                authorUrl: website || null
+            },
+        });
+
+        // Check if the comment was successfully created
+        if (data.createComment && data.createComment.success) {
+            return res.status(200).json({
+                success: true,
+                message: 'Your comment has been submitted and is awaiting approval.',
+                comment: data.createComment.comment
+            });
+        } else {
+            console.error('WordPress comment creation response:', data);
+            return res.status(400).json({
+                success: false,
+                message: 'Failed to submit comment to WordPress'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error submitting comment to WordPress:', error);
+
+        // Provide more specific error messages based on the error
+        let errorMessage = 'An error occurred while submitting your comment.';
+
+        if (error.response?.errors?.length > 0) {
+            // Extract the specific error message from GraphQL response
+            errorMessage = error.response.errors.map(err => err.message).join(', ');
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: errorMessage
+        });
+    }
 }
